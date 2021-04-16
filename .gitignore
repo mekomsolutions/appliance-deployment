@@ -1,0 +1,5 @@
+images.txt
+autorun_profile/*-distro/
+autorun_profile/bahmni-distro-*
+autorun_profile/images/
+target/
