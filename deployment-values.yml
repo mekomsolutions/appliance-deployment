@@ -1,0 +1,8 @@
+docker_registry: 10.0.90.99
+apps:
+  proxy:
+    service:
+      loadBalancerIP: 10.0.90.20
+  odoo:
+    service:
+      loadBalancerIP: 10.0.90.21
