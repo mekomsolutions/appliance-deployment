@@ -1,28 +1,38 @@
 #!/usr/bin/env bash
-
 DISTRO_NAME=c2c
-REGISTRY_IP=${REGISTRY_IP:-10.0.0.21}
+REGISTRY_IP=${REGISTRY_IP:-10.0.90.99}
+SSD_MOUNT_POINT=/mnt/disks/ssd1/
+kubectl_bin="/usr/bin/k3s kubectl"
 
+echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
 # Ensure registry directory exists
-mkdir -p /mnt/disks/ssd1/registry
+mkdir -p $SSD_MOUNT_POINT/registry
+# sync images to registry
+skopeo sync --dest-tls-verify=false --src dir --dest docker ./images/ $REGISTRY_IP/mekomsolutions
 
-# sync images to registry  
-skopeo sync --dest-tls-verify=false --src dir --dest docker ./images/ $REGISTRY_IP
-
+echo "⚙️  Apply K8s description files: config/ ..."
 # Apply config
-k3s kubectl apply -f ./configs
+k3s kubectl apply -f ./$DISTRO_NAME-distro/bahmni-helm/templates/configs
 
 # Ensure distro directory exists
-mkdir -p $ssd_mount_point/distro
+mkdir -p $SSD_MOUNT_POINT/distro
 
-# Sending distro to volume 
-./upload-files.sh mdlh/alpine-rsync  ./distro/ c2c-distro-pvc
+echo "⚙️  Upload the distro..."
+# Sending distro to volume
+./upload-files.sh $REGISTRY_IP/mekomsolutions/alpine-rsync ./bahmni-distro-$DISTRO_NAME/ $DISTRO_NAME-distro-pvc
+
+# Create data volumes
+mkdir -p $SSD_MOUNT_POINT/data/postgresql
+mkdir -p $SSD_MOUNT_POINT/data/mysql
+# Create backup folder
+mkdir -p $SSD_MOUNT_POINT/backup
 
 # Apply K8s description files
-k3s kubectl apply -f ./$DISTRO_NAME-distro/common
-k3s kubectl apply -f ./$DISTRO_NAME-distro/resources
-k3s kubectl apply -f ./$DISTRO_NAME-distro/apps/ -R
+echo "⚙️  Apply K8s description files: common/ ..."
+k3s kubectl apply -f ./$DISTRO_NAME-distro/bahmni-helm/templates/common
+echo "⚙️  Apply K8s description files: resources/ ..."
+k3s kubectl apply -f ./$DISTRO_NAME-distro/bahmni-helm/templates/resources
+echo "⚙️  Apply K8s description files: apps/ ..."
+k3s kubectl apply -f ./$DISTRO_NAME-distro/bahmni-helm/templates/apps/ -R
 
-sleep 100
-export POD_NAME=$(kubectl get pods -l name=c2c-update-container -o=jsonpath='{.items..metadata.name}')
-./krsync -av --progress --stats distro/  $POD_NAME:/distro/
+echo "✅  Done."
