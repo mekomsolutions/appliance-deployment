@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 DISTRO_NAME=c2c
 REGISTRY_IP=${REGISTRY_IP:-10.0.90.99}
 SSD_MOUNT_POINT=/mnt/disks/ssd1/
@@ -12,14 +13,14 @@ skopeo sync --dest-tls-verify=false --src dir --dest docker ./images/ $REGISTRY_
 
 echo "⚙️  Apply K8s description files: config/ ..."
 # Apply config
-k3s kubectl apply -f ./$DISTRO_NAME-distro/bahmni-helm/templates/configs
+k3s kubectl apply -f ./distro/bahmni-helm/templates/configs
 
 # Ensure distro directory exists
 mkdir -p $SSD_MOUNT_POINT/distro
 
 echo "⚙️  Upload the distro..."
 # Sending distro to volume
-./upload-files.sh $REGISTRY_IP/mekomsolutions/alpine-rsync ./bahmni-distro-$DISTRO_NAME/ $DISTRO_NAME-distro-pvc
+./utils/upload-files.sh $REGISTRY_IP/mekomsolutions/alpine-rsync ./bahmni-distro-$DISTRO_NAME/ $DISTRO_NAME-distro-pvc
 
 # Create data volumes
 mkdir -p $SSD_MOUNT_POINT/data/postgresql
@@ -29,10 +30,10 @@ mkdir -p $SSD_MOUNT_POINT/backup
 
 # Apply K8s description files
 echo "⚙️  Apply K8s description files: common/ ..."
-k3s kubectl apply -f ./$DISTRO_NAME-distro/bahmni-helm/templates/common
+k3s kubectl apply -f ./k8s/bahmni-helm/templates/common
 echo "⚙️  Apply K8s description files: resources/ ..."
-k3s kubectl apply -f ./$DISTRO_NAME-distro/bahmni-helm/templates/resources
+k3s kubectl apply -f ./k8s/bahmni-helm/templates/resources
 echo "⚙️  Apply K8s description files: apps/ ..."
-k3s kubectl apply -f ./$DISTRO_NAME-distro/bahmni-helm/templates/apps/ -R
+k3s kubectl apply -f ./k8s/bahmni-helm/templates/apps/ -R
 
 echo "✅  Done."
