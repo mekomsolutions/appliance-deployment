@@ -1,10 +1,9 @@
-## Apppliance Deployment 
+## Appliance Deployment
 
-A set of scripts to prepare a `usb_autorunner` profile ready for the appliance
+Repository of [USB Autorunner](https://github.com/mekomsolutions/appliance-os/tree/master/roles/usb_autorunner) profiles that can be deployed on the cluster appliance
 
 ### Dependencies
 
 - yq
 - skopeo
 - helm
-- 
