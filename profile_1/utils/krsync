@@ -1,5 +1,5 @@
 #!/bin/bash
-kubectl_bin="/usr/bin/k3s kubectl"
+kubectl_bin="/usr/local/bin/k3s kubectl"
 if [ -z "$KRSYNC_STARTED" ]; then
     export KRSYNC_STARTED=true
     while [ 1 ]
