@@ -18,7 +18,7 @@ k3s kubectl apply -f $PWD/k8s/bahmni-helm/templates/configs
 
 echo "⚙️  Upload the distro..."
 # Sending distro to volume
-$PWD/utils/upload-files.sh $REGISTRY_IP/mekomsolutions/alpine-rsync $PWD/distro/ $DISTRO_NAME-distro-pvc
+$PWD/utils/upload-files.sh $REGISTRY_IP/mekomsolutions/alpine-rsync $PWD/distro/ distro-pvc
 
 # Create data volumes
 mkdir -p $SSD_MOUNT_POINT/data/postgresql

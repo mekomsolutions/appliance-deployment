@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 kubectl_bin="/usr/local/bin/k3s kubectl"
 if [ -z "$KRSYNC_STARTED" ]; then
     export KRSYNC_STARTED=true
