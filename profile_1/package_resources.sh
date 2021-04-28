@@ -4,14 +4,18 @@ set -e
 PWD=$(dirname "$0")
 DISTRO_NAME=c2c
 DISTRO_VERSION=1.0.0-SNAPSHOT
-DISTRO_REVISION=1.0.0-20210416.142111-53
+DISTRO_REVISION=1.0.0-20210427.115038-60
 BUILD_DIR=$PWD/target/build
 RESOURCES_DIR=$PWD/target/resources
 IMAGES_FILE=./$BUILD_DIR/images.txt
 DISTRO_VALUES_FILE=$PWD/custom-values.yml
 DEPLOYMENT_VALUES_FILE=$PWD/deployment-values.yml
 
+rm -rf $BUILD_DIR
 mkdir -p $BUILD_DIR
+
+rm -rf $RESOURCES_DIR
+mkdir -p $RESOURCES_DIR
 
 # Fetch distro
 echo "⚙️ Download $DISTRO_NAME distro..."
@@ -48,7 +52,7 @@ do
             if [ $initImage != "null" ]  ; then
                 echo "here"
                 if [[ $initImage != *":"* ]] ; then
-                    $initImage = "${initImage}:latest"
+                    initImage=$initImage:latest
                 fi
               echo "Init Image: " $initImage
               echo $initImage | sed 's/\"//g'>> $IMAGES_FILE

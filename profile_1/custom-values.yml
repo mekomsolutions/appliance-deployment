@@ -26,5 +26,9 @@ apps:
     enabled: true
   postgresql:
     enabled: true
+  openelis:
+    image: mekomsolutions/openelis:latest
+    initImage: mekomsolutions/openelis-init:latest
+    enabled: true
   backup_services:
     schedule: "0 * * * *"
