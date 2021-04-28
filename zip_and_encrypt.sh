@@ -1,4 +1,5 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/env bash
+set -e
 
 PROFILE_NAME=$1
 PROFILE_RESOURCES_DIR=$PROFILE_NAME/target/resources

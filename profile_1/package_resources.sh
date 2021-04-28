@@ -1,4 +1,5 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/env bash
+set -e
 
 PWD=$(dirname "$0")
 DISTRO_NAME=c2c

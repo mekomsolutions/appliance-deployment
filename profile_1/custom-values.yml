@@ -17,7 +17,7 @@ apps:
     image: mekomsolutions/mariadb:10.3
   odoo:
     initImage: mekomsolutions/postgres:alpine
-    image: mekomsolutions/postgres:alpine
+    image: mekomsolutions/odoo:latest
     enabled: true
   odoo_connect:
     enabled: true
