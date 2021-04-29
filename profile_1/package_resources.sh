@@ -52,7 +52,7 @@ do
             if [ $initImage != "null" ]  ; then
                 echo "here"
                 if [[ $initImage != *":"* ]] ; then
-                    initImage=$initImage:latest
+                    initImage="${initImage}:latest"
                 fi
               echo "Init Image: " $initImage
               echo $initImage | sed 's/\"//g'>> $IMAGES_FILE

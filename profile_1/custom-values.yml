@@ -29,6 +29,7 @@ apps:
   openelis:
     image: mekomsolutions/openelis:latest
     initImage: mekomsolutions/openelis-init:latest
+    loggingImage: mekomsolutions/busybox:latest
     enabled: true
   backup_services:
     schedule: "0 * * * *"
