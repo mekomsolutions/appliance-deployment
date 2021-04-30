@@ -4,7 +4,7 @@ PWD=$(dirname "$0")
 DISTRO_NAME=c2c
 REGISTRY_IP=${REGISTRY_IP:-10.0.90.99}
 SSD_MOUNT_POINT=/mnt/disks/ssd1/
-kubectl_bin="/usr/bin/k3s kubectl"
+kubectl_bin="/usr/local/bin/k3s kubectl"
 
 echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
 # Ensure registry directory exists
