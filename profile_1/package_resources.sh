@@ -8,6 +8,7 @@ DISTRO_REVISION=1.0.0-20210427.115038-60
 BUILD_DIR=$PWD/target/build
 RESOURCES_DIR=$PWD/target/resources
 IMAGES_FILE=./$BUILD_DIR/images.txt
+VALUES_FILE=$BUILD_DIR/k8s-description-files/src/bahmni-helm/values.yaml
 DISTRO_VALUES_FILE=$PWD/custom-values.yml
 DEPLOYMENT_VALUES_FILE=$PWD/deployment-values.yml
 
@@ -31,7 +32,7 @@ git clone https://github.com/mekomsolutions/k8s-description-files.git $BUILD_DIR
 echo "⚙️ Run Helm to substitute custom values..."
 helm template `[ -f $DISTRO_VALUES_FILE ] && echo "-f $DISTRO_VALUES_FILE"` `[ -f $DEPLOYMENT_VALUES_FILE ] && echo "-f $DEPLOYMENT_VALUES_FILE"` $DISTRO_NAME ./$BUILD_DIR/k8s-description-files/src/bahmni-helm --output-dir $RESOURCES_DIR/k8s
 
-echo "⚙️ Read container images from '$DISTRO_VALUES_FILE'..."
+echo "⚙️ Read container images from '$DISTRO_VALUES_FILE' and '$VALUES_FILE'..."
 cat /dev/null > $IMAGES_FILE
 apps=`yq e -j '.apps' $DISTRO_VALUES_FILE | jq 'keys'`
 for app in ${apps//,/ }
@@ -41,21 +42,37 @@ do
     then
         enabled=`yq e -j $DISTRO_VALUES_FILE | jq ".apps[${app}].enabled"`
         if [ $enabled ]  ; then
-            image=`yq e -j $BUILD_DIR/k8s-description-files/src/bahmni-helm/values.yaml | jq ".apps[${app}].image"`
+            image=`yq e -j $VALUES_FILE | jq ".apps[${app}].image"`
             if [[ $image != *":"* ]] ; then
-            image="${image}:latest"
+              image="${image}:latest"
             fi
             echo "Image: " $image
             echo $image | sed 's/\"//g'>> $IMAGES_FILE
-            initImage=`yq e -j $BUILD_DIR/k8s-description-files/src/bahmni-helm/values.yaml | jq ".apps[${app}].initImage"`
+            initImage=`yq e -j $VALUES_FILE | jq ".apps[${app}].initImage"`
             # Scan for initImage too
             if [ $initImage != "null" ]  ; then
-                echo "here"
                 if [[ $initImage != *":"* ]] ; then
                     initImage="${initImage}:latest"
                 fi
               echo "Init Image: " $initImage
               echo $initImage | sed 's/\"//g'>> $IMAGES_FILE
+            fi
+            # Scan for backup services images too
+            backupImagesJSON=`yq e -j $VALUES_FILE | jq ".apps[${app}].apps"`
+            if [ "$backupImagesJSON" != "null" ]  ; then
+              backupApps=$(echo "$backupImagesJSON" | jq 'keys')
+              for backupApp in ${backupApps//,/ }
+              do
+                if [[ $backupApp == \"* ]] ; then
+                  backupImage=$(echo "$backupImagesJSON" | jq ".[${backupApp}].image")
+                  echo "Backup Image: $backupImage"
+                  if [[ $backupImage != *":"* ]] ; then
+                      backupImage="${backupImage}:latest"
+                  fi
+                  echo "Backup Image: " $backupImage
+                  echo $backupImage | sed 's/\"//g'>> $IMAGES_FILE
+                fi
+              done
             fi
         fi
     fi
