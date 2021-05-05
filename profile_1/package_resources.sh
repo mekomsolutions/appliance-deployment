@@ -48,8 +48,8 @@ do
             fi
             echo "Image: " $image
             echo $image | sed 's/\"//g'>> $IMAGES_FILE
-            initImage=`yq e -j $VALUES_FILE | jq ".apps[${app}].initImage"`
             # Scan for initImage too
+            initImage=`yq e -j $VALUES_FILE | jq ".apps[${app}].initImage"`
             if [ $initImage != "null" ]  ; then
                 if [[ $initImage != *":"* ]] ; then
                     initImage="${initImage}:latest"
@@ -73,6 +73,15 @@ do
                   echo $backupImage | sed 's/\"//g'>> $IMAGES_FILE
                 fi
               done
+            fi
+            # Scan for logging images too
+            loggingImage=`yq e -j $VALUES_FILE | jq ".apps[${app}].loggingImage"`
+            if [ $loggingImage != "null" ]  ; then
+                if [[ $loggingImage != *":"* ]] ; then
+                    loggingImage="${loggingImage}:latest"
+                fi
+              echo "Logging Image: " $loggingImage
+              echo $loggingImage | sed 's/\"//g'>> $IMAGES_FILE
             fi
         fi
     fi
