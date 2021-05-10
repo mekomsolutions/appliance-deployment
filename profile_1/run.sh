@@ -10,7 +10,7 @@ echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
 # Ensure registry directory exists
 mkdir -p $SSD_MOUNT_POINT/registry
 # sync images to registry
-skopeo sync --dest-tls-verify=false --src dir --dest docker $PWD/images/docker.io $REGISTRY_IP
+skopeo sync --scoped --dest-tls-verify=false --src dir --dest docker $PWD/images/docker.io $REGISTRY_IP
 
 echo "⚙️  Apply K8s description files: config/ ..."
 # Apply config
