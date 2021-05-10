@@ -1,4 +1,6 @@
 apps:
+  updatebox:
+    enabled: true
   proxy:
     enabled: true
   appointments:
