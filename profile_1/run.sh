@@ -10,7 +10,7 @@ echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
 # Ensure registry directory exists
 mkdir -p $SSD_MOUNT_POINT/registry
 # sync images to registry
-skopeo sync --dest-tls-verify=false --src dir --dest docker $PWD/images/ $REGISTRY_IP/mekomsolutions
+skopeo sync --dest-tls-verify=false --src dir --dest docker $PWD/images/docker.io $REGISTRY_IP
 
 echo "⚙️  Apply K8s description files: config/ ..."
 # Apply config
@@ -18,7 +18,7 @@ k3s kubectl apply -f $PWD/k8s/bahmni-helm/templates/configs
 
 echo "⚙️  Upload the distro..."
 # Sending distro to volume
-$PWD/utils/upload-files.sh $REGISTRY_IP/mekomsolutions/alpine-rsync $PWD/distro/ distro-pvc
+$PWD/utils/upload-files.sh $REGISTRY_IP/mdlh/alpine-rsync $PWD/distro/ distro-pvc
 
 # Create data volumes
 mkdir -p $SSD_MOUNT_POINT/data/postgresql

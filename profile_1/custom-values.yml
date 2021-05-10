@@ -1,9 +1,6 @@
 apps:
-  updatebox:
-    image: mekomsolutions/alpine-rsync
   proxy:
     enabled: true
-    image: mekomsolutions/proxy:latest
   appointments:
     enabled: true
   bahmni_config:
@@ -14,22 +11,15 @@ apps:
     enabled: true
   mysql:
     enabled: true
-    image: mekomsolutions/mariadb:10.3
   odoo:
-    initImage: mekomsolutions/postgres:alpine
-    image: mekomsolutions/odoo:latest
     enabled: true
   odoo_connect:
     enabled: true
   openmrs:
-    initImage: mekomsolutions/mariadb:10.3
     enabled: true
   postgresql:
     enabled: true
   openelis:
-    image: mekomsolutions/openelis:latest
-    initImage: mekomsolutions/openelis-init:latest
-    loggingImage: mekomsolutions/busybox:latest
     enabled: true
   backup_services:
     schedule: "0 * * * *"
