@@ -42,7 +42,7 @@ do
     then
         enabled=`yq e -j $DISTRO_VALUES_FILE | jq ".apps[${app}].enabled"`
         if [ $enabled ]  ; then
-            image=`yq e -j $VALUES_FILE | jq ".apps[${app}].image"`
+          image=`yq e -j $VALUES_FILE | jq ".apps[${app}].image"`
             if [[ $image != *":"* ]] ; then
               image="${image}:latest"
             fi
@@ -86,6 +86,13 @@ do
         fi
     fi
 done
+
+echo "🚀 Remove images duplicates..."
+temp_file=$(mktemp)
+cp $IMAGES_FILE $temp_file
+sort $temp_file | uniq -u > $IMAGES_FILE
+rm ${temp_file}
+cat $IMAGES_FILE
 
 echo "🚀 Download container images..."
 set +e

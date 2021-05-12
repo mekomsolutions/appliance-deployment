@@ -18,7 +18,7 @@ k3s kubectl apply -f $PWD/k8s/bahmni-helm/templates/configs
 
 echo "⚙️  Upload the distro..."
 # Sending distro to volume
-$PWD/utils/upload-files.sh $REGISTRY_IP/mdlh/alpine-rsync $PWD/distro/ distro-pvc
+$PWD/utils/upload-files.sh $REGISTRY_IP/mdlh/alpine-rsync:3.11-3.1-1 $PWD/distro/ distro-pvc
 
 # Create data volumes
 mkdir -p $SSD_MOUNT_POINT/data/postgresql
@@ -29,8 +29,6 @@ mkdir -p $SSD_MOUNT_POINT/backup
 # Apply K8s description files
 echo "⚙️  Apply K8s description files: common/ ..."
 k3s kubectl apply -f $PWD/k8s/bahmni-helm/templates/common
-echo "⚙️  Apply K8s description files: resources/ ..."
-k3s kubectl apply -f $PWD/k8s/bahmni-helm/templates/resources
 echo "⚙️  Apply K8s description files: apps/ ..."
 k3s kubectl apply -f $PWD/k8s/bahmni-helm/templates/apps/ -R
 
