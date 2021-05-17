@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-PROFILE_NAME=$1
-PROFILE_RESOURCES_DIR=$PROFILE_NAME/target/resources
+PROFILE_PATH=usb_autorunner_profiles/$1
+PROFILE_RESOURCES_DIR=$PROFILE_PATH/target/resources
 PROJECT_DIR=$(pwd)
 TARGET_DIR=$PROJECT_DIR/target
 BUILD_DIR=$TARGET_DIR/build
@@ -11,7 +11,7 @@ rm -rf $TARGET_DIR
 mkdir -p $BUILD_DIR
 
 echo "⚙️ Run 'package_resources.sh'..."
-bash $PROFILE_NAME/package_resources.sh
+bash $PROFILE_PATH/package_resources.sh
 
 echo "⚙️ Compress resources into 'autorun.zip' file..."
 cd $PROFILE_RESOURCES_DIR/ && zip $BUILD_DIR/autorun.zip -r ./* && cd $PWD

@@ -6,9 +6,15 @@ Repository of [USB Autorunner](https://github.com/mekomsolutions/appliance-os/tr
 
 Run
 ```
-./zip_and_encrypt profile_1
+./zip_and_encrypt <profile_name>
 ```
-Copy the output artifacts `autorun.zip.enc` and `secret.key.enc` on a USB key.
+
+List of profiles:
+- backup
+- deploy
+- restore
+
+Copy the output artifacts `autorun.zip.enc` and `secret.key.enc` at the root of any USB key.
 
 This will be ready to be plugged on one of the appliance nodes
 
