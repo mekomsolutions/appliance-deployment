@@ -17,7 +17,7 @@ else
 fi
 
 echo "⚙️ Copy 'dump.sql'"
-cp $PWD/dump.sql $RESOURCES_DIR/
+cp $PWD/*.sql $RESOURCES_DIR/
 
 echo "⚙️ Copy 'run.sh'"
 cp -R $PWD/run.sh $RESOURCES_DIR/

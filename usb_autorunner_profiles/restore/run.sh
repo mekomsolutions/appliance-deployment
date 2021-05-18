@@ -47,24 +47,21 @@ spec:
       volumes:
       - name: restore-storage
         hostPath:
-          path: ${ARCHIVE_PATH}
-          type: File
+          path: ${AUTORUNNER_WORKDIR}
       containers:
       - name: mysql-db-restore
         image: 10.0.90.99/mekomsolutions/mysql_backup:9ab7a24
         command: ["mysql"]
-        args: ["-hmysql", "-u${DB_USERNAME}", "-p${DB_PASSWORD}", "${DB_NAME}", "-e", "source /opt/dump.sql"]
+        args: ["-hmysql", "-u${DB_USERNAME}", "-p${DB_PASSWORD}", "${DB_NAME}", "-e", "SOURCE /opt/dump.sql; SOURCE /opt/rebuild_index.sql;"]
         env:
         volumeMounts:
         - name: restore-storage
-          mountPath: /opt/dump.sql
+          mountPath: /opt/
       restartPolicy: Never
 EOF
-  echo "🕐 Wait for the job to complete... (timeou=1h)"
+  echo "🕐 Wait for the job to complete... (timeout=1h)"
   $kubectl wait --for=condition=complete --timeout 3600s job/${JOB_NAME}
   echo "Completed."
-
-  echo "Set OpenMRS index to be rebuilt"
 
   echo "🚀 Restart OpenMRS service"
   $kubectl scale deployment ${OPENMRS_SERVICE_NAME} --replicas 1
