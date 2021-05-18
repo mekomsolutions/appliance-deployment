@@ -4,11 +4,12 @@ set -e
 kubectl="/usr/local/bin/k3s kubectl"
 PWD=$(dirname "$0")
 REGISTRY_IP=10.0.90.99
-NAMESPACE=""
+: "${NAMESPACE:=default}"
 
 JOB_NAME=openmrs-db-restore
 OPENMRS_SERVICE_NAME=openmrs
-ARCHIVE_PATH=/opt/autorunner/workdir/dump.sql
+AUTORUNNER_WORKDIR=/opt/autorunner/workdir
+ARCHIVE_PATH=${AUTORUNNER_WORKDIR}/dump.sql
 
 mysql_app=`$kubectl get statefulsets.apps | grep 'mysql'`
 if [ -n "$mysql_app" ] ; then
@@ -72,4 +73,5 @@ else
   echo "⚠️  MySQL service is not found, abort"
   exit 1
 fi
+
 echo "✅ Done."
