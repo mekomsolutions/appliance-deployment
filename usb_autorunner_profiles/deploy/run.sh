@@ -11,7 +11,7 @@ echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
 # Ensure registry directory exists
 mkdir -p $SSD_MOUNT_POINT/registry
 POD_NAME=$($kubectl_bin get pod -l app=registry -o jsonpath="{.items[0].metadata.name}" -n $NAMESPACE)
-$kubectl_bin wait --for=condition=ready --timeout=120s pod $POD_NAME -n $NAMESPACE
+$kubectl_bin wait --for=condition=ready --timeout 1800s pod $POD_NAME -n $NAMESPACE
 
 # sync images to registry
 skopeo sync --scoped --dest-tls-verify=false --src dir --dest docker $PWD/images/docker.io $REGISTRY_IP
@@ -23,6 +23,10 @@ $kubectl_bin apply -f $PWD/k8s/bahmni-helm/templates/configs
 echo "⚙️  Upload the distro..."
 # Sending distro to volume
 $PWD/utils/upload-files.sh $REGISTRY_IP/mdlh/alpine-rsync:3.11-3.1-1 $PWD/distro/ distro-pvc
+
+echo "🧽 Delete the 'openmrs' pod (will be recreated right after)"
+POD_NAME=$($kubectl_bin get pod -l app=openmrs -o jsonpath="{.items[0].metadata.name}" -n $NAMESPACE)
+$kubectl_bin delete pod $POD_NAME -n $NAMESPACE
 
 # Create data volumes
 mkdir -p $SSD_MOUNT_POINT/data/postgresql

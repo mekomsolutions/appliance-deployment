@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
-BASE_DIR=$(dirname "$0")
 DISTRO_NAME=c2c
 DISTRO_VERSION=1.0.0-SNAPSHOT
 DISTRO_REVISION=1.0.0-20210514.150940-74
+PVC_MOUNTER_IMAGE=mdlh/alpine-rsync:3.11-3.1-1
+
+BASE_DIR=$(dirname "$0")
 BUILD_DIR=$BASE_DIR/target/build
 RESOURCES_DIR=$BASE_DIR/target/resources
 IMAGES_FILE=$BUILD_DIR/images.txt
@@ -36,8 +38,12 @@ cd $BUILD_DIR/k8s-description-files && git checkout $K8S_DESCRIPTION_FILES_GIT_R
 echo "⚙️ Run Helm to substitute custom values..."
 helm template `[ -f $DISTRO_VALUES_FILE ] && echo "-f $DISTRO_VALUES_FILE"` `[ -f $DEPLOYMENT_VALUES_FILE ] && echo "-f $DEPLOYMENT_VALUES_FILE"` $DISTRO_NAME $BUILD_DIR/k8s-description-files/src/bahmni-helm --output-dir $RESOURCES_DIR/k8s
 
-echo "⚙️ Parse the list of container images..."
+# Get container images
 cat /dev/null > $IMAGES_FILE
+echo "⚙️ Add the $PVC_MOUNTER_IMAGE image"
+echo "docker.io/$PVC_MOUNTER_IMAGE" >> $IMAGES_FILE
+
+echo "⚙️ Parse the list of container images..."
 grep -ri "image:" $RESOURCES_DIR/k8s  | awk -F': ' '{print $3}' | xargs | tr " " "\n" >> $IMAGES_FILE
 
 echo "⚙️ Read registry address from '$DEPLOYMENT_VALUES_FILE'"
@@ -55,8 +61,10 @@ cat $IMAGES_FILE
 
 echo "🚀 Download container images..."
 set +e
-cat $IMAGES_FILE | $BASE_DIR/download-images.sh $RESOURCES_DIR/images
+mkdir -p $BUILD_DIR/images
+cat $IMAGES_FILE | $BASE_DIR/download-images.sh $BUILD_DIR/images
 set -e
 
+# Copy resources
 echo "⚙️ Copy 'run.sh' and 'utils/'..."
-cp -R $BASE_DIR/run.sh $BASE_DIR/utils $RESOURCES_DIR/
+cp -R $BASE_DIR/run.sh $BASE_DIR/utils $BUILD_DIR/images $RESOURCES_DIR/

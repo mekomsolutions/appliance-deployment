@@ -16,7 +16,7 @@ else
   exit 1
 fi
 
-echo "⚙️ Copy 'dump.sql'"
+echo "⚙️ Copy SQL files"
 cp $PWD/*.sql $RESOURCES_DIR/
 
 echo "⚙️ Copy 'run.sh'"
