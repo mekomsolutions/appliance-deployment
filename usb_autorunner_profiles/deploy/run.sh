@@ -7,13 +7,14 @@ SSD_MOUNT_POINT=/mnt/disks/ssd1/
 kubectl_bin="/usr/local/bin/k3s kubectl"
 : "${NAMESPACE:=default}"
 
-echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
 # Ensure registry directory exists
+echo "⏱ Wait for the registry to be ready..."
 mkdir -p $SSD_MOUNT_POINT/registry
 POD_NAME=$($kubectl_bin get pod -l app=registry -o jsonpath="{.items[0].metadata.name}" -n $NAMESPACE)
 $kubectl_bin wait --for=condition=ready --timeout 1800s pod $POD_NAME -n $NAMESPACE
 
 # sync images to registry
+echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
 skopeo sync --scoped --dest-tls-verify=false --src dir --dest docker $PWD/images/docker.io $REGISTRY_IP
 
 echo "⚙️  Apply K8s description files: config/ ..."
