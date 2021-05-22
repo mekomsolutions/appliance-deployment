@@ -2,8 +2,11 @@
 set -e
 
 DISTRO_NAME=c2c
-DISTRO_VERSION=1.0.0-SNAPSHOT
-DISTRO_REVISION=1.0.0-20210521.152106-76
+DISTRO_VERSION=1.0.0
+DISTRO_REVISION=1.0.0
+MAVEN_REPO=https://nexus.mekomsolutions.net/repository/maven-releases
+DISTRO_URL=$MAVEN_REPO/net/mekomsolutions/bahmni-distro-$DISTRO_NAME/$DISTRO_VERSION/bahmni-distro-$DISTRO_NAME-$DISTRO_REVISION.zip
+
 PVC_MOUNTER_IMAGE=mdlh/alpine-rsync:3.11-3.1-1
 
 BASE_DIR=$(dirname "$0")
@@ -23,7 +26,7 @@ mkdir -p $RESOURCES_DIR
 
 # Fetch distro
 echo "⚙️ Download $DISTRO_NAME distro..."
-wget https://nexus.mekomsolutions.net/repository/maven-snapshots/net/mekomsolutions/bahmni-distro-$DISTRO_NAME/$DISTRO_VERSION/bahmni-distro-$DISTRO_NAME-$DISTRO_REVISION.zip -O $BUILD_DIR/bahmni-distro-c2c.zip
+wget $DISTRO_URL -O $BUILD_DIR/bahmni-distro-c2c.zip
 mkdir -p $RESOURCES_DIR/distro
 unzip $BUILD_DIR/bahmni-distro-c2c.zip -d $RESOURCES_DIR/distro
 
