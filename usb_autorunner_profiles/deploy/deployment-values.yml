@@ -7,4 +7,4 @@ apps:
     service:
       loadBalancerIP: 10.0.90.31
   backup_services:
-    schedule: "0 * * * *"
+    schedule: "0 20 * * *"

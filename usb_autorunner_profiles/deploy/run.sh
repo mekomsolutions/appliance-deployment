@@ -6,9 +6,22 @@ REGISTRY_IP=${REGISTRY_IP:-10.0.90.99}
 SSD_MOUNT_POINT=/mnt/disks/ssd1/
 kubectl_bin="/usr/local/bin/k3s kubectl"
 : "${NAMESPACE:=default}"
+TIMEZONE="America/Port-au-Prince"
+
+echo "⌚️ Set the server time zone"
+timedatectl set-timezone $TIMEZONE
+
+echo "🗂 Initialize local storage folders."
+# Create data volumes
+mkdir -p $SSD_MOUNT_POINT/data/postgresql
+mkdir -p $SSD_MOUNT_POINT/data/mysql
+# Create entrypoint-db volume
+mkdir -p $SSD_MOUNT_POINT/data/entrypoint-db
+# Create backup folder
+mkdir -p $SSD_MOUNT_POINT/backup
 
 # Ensure registry directory exists
-echo "⏱ Wait for the registry to be ready..."
+echo "⏱  Wait for the registry to be ready..."
 mkdir -p $SSD_MOUNT_POINT/registry
 POD_NAME=$($kubectl_bin get pod -l app=registry -o jsonpath="{.items[0].metadata.name}" -n $NAMESPACE)
 $kubectl_bin wait --for=condition=ready --timeout 1800s pod $POD_NAME -n $NAMESPACE
@@ -28,12 +41,6 @@ $PWD/utils/upload-files.sh $REGISTRY_IP/mdlh/alpine-rsync:3.11-3.1-1 $PWD/distro
 echo "🧽 Delete the 'openmrs' pod (will be recreated right after)"
 POD_NAME=$($kubectl_bin get pod -l app=openmrs -o jsonpath="{.items[0].metadata.name}" -n $NAMESPACE)
 $kubectl_bin delete pod $POD_NAME -n $NAMESPACE
-
-# Create data volumes
-mkdir -p $SSD_MOUNT_POINT/data/postgresql
-mkdir -p $SSD_MOUNT_POINT/data/mysql
-# Create backup folder
-mkdir -p $SSD_MOUNT_POINT/backup
 
 # Apply K8s description files
 echo "⚙️  Apply K8s description files: common/ ..."
