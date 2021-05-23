@@ -40,7 +40,7 @@ $kubectl wait --for=condition=ready --timeout=60s pod $POD_NAME -n $NAMESPACE
 n=0
 until [ "$n" -ge 5 ]
 do
-   $DIR/krsync -av --progress --stats $2 $POD_NAME@$NAMESPACE:/$3 && break  # substitute your command here
+   $DIR/krsync -av --delete --progress --stats $2 $POD_NAME@$NAMESPACE:/$3 && break  # substitute your command here
    n=$((n+1))
    sleep 15
 done

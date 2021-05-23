@@ -11,7 +11,7 @@ TIMEZONE="America/Port-au-Prince"
 echo "⌚️ Set the server time zone to '$TIMEZONE'"
 timedatectl set-timezone $TIMEZONE
 
-echo "🗂 Initialize local storage folders."
+echo "🗂  Initialize local storage folders."
 # Create data volumes
 mkdir -p $SSD_MOUNT_POINT/data/postgresql
 mkdir -p $SSD_MOUNT_POINT/data/mysql
