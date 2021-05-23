@@ -2,8 +2,8 @@
 set -e
 
 DISTRO_NAME=c2c
-DISTRO_VERSION=1.0.0
-DISTRO_REVISION=1.0.0
+DISTRO_VERSION=1.0.1
+DISTRO_REVISION=1.0.1
 MAVEN_REPO=https://nexus.mekomsolutions.net/repository/maven-releases
 DISTRO_URL=$MAVEN_REPO/net/mekomsolutions/bahmni-distro-$DISTRO_NAME/$DISTRO_VERSION/bahmni-distro-$DISTRO_NAME-$DISTRO_REVISION.zip
 
