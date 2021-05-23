@@ -8,7 +8,7 @@ kubectl_bin="/usr/local/bin/k3s kubectl"
 : "${NAMESPACE:=default}"
 TIMEZONE="America/Port-au-Prince"
 
-echo "⌚️ Set the server time zone"
+echo "⌚️ Set the server time zone to '$TIMEZONE'"
 timedatectl set-timezone $TIMEZONE
 
 echo "🗂 Initialize local storage folders."
