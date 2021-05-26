@@ -63,7 +63,7 @@ EOF
   $kubectl wait --for=condition=complete --timeout 3600s job/${JOB_NAME}
   echo "Completed."
 
-  echo "🚀 Restart OpenMRS service"
+  echo "🚀 Start OpenMRS service"
   $kubectl scale deployment ${OPENMRS_SERVICE_NAME} --replicas 1
 
 else
