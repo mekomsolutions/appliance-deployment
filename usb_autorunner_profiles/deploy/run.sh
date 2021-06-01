@@ -30,8 +30,8 @@ $kubectl_bin wait --for=condition=ready --timeout 1800s pod $POD_NAME -n $NAMESP
 echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
 skopeo sync --scoped --dest-tls-verify=false --src dir --dest docker $PWD/images/docker.io $REGISTRY_IP
 
-echo "⚙️  Apply K8s description files: config/ ..."
 # Apply config
+echo "⚙️  Apply K8s description files: config/ ..."
 $kubectl_bin apply -f $PWD/k8s/bahmni-helm/templates/configs
 
 echo "⚙️  Upload the distro..."
@@ -45,8 +45,6 @@ $kubectl_bin delete pod $POD_NAME -n $NAMESPACE
 # Apply K8s description files
 echo "⚙️  Apply K8s description files: common/ ..."
 $kubectl_bin apply -f $PWD/k8s/bahmni-helm/templates/common
-echo "⚙️  Apply K8s description files: configs/ ..."
-$kubectl_bin apply -f $PWD/k8s/bahmni-helm/templates/configs
 echo "⚙️  Apply K8s description files: apps/ ..."
 $kubectl_bin apply -f $PWD/k8s/bahmni-helm/templates/apps/ -R
 
