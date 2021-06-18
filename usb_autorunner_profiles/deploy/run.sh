@@ -19,6 +19,8 @@ mkdir -p $SSD_MOUNT_POINT/data/mysql
 mkdir -p $SSD_MOUNT_POINT/data/entrypoint-db
 # Create backup folder
 mkdir -p $SSD_MOUNT_POINT/backup
+# Create logging folder
+mkdir -p $SSD_MOUNT_POINT/logging
 
 # Ensure registry directory exists
 echo "⏱  Wait for the registry to be ready..."
