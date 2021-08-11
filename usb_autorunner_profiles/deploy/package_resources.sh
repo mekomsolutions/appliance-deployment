@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-DISTRO_NAME=c2c
-DISTRO_VERSION=1.0.2
-DISTRO_REVISION=1.0.2
 MAVEN_REPO=https://nexus.mekomsolutions.net/repository/maven-releases
-DISTRO_URL=$MAVEN_REPO/net/mekomsolutions/bahmni-distro-$DISTRO_NAME/$DISTRO_VERSION/bahmni-distro-$DISTRO_NAME-$DISTRO_REVISION.zip
+DISTRO_URL=$MAVEN_REPO/net/mekomsolutions/$DISTRO_NAME/$DISTRO_VERSION/$DISTRO_NAME-$DISTRO_REVISION.zip
 
 PVC_MOUNTER_IMAGE=mdlh/alpine-rsync:3.11-3.1-1
 
@@ -16,7 +13,7 @@ IMAGES_FILE=$BUILD_DIR/images.txt
 VALUES_FILE=$BUILD_DIR/k8s-description-files/src/bahmni-helm/values.yaml
 DISTRO_VALUES_FILE=$RESOURCES_DIR/distro/k8s-services.yml
 DEPLOYMENT_VALUES_FILE=$BASE_DIR/deployment-values.yml
-K8S_DESCRIPTION_FILES_GIT_REF=master
+: {K8S_DESCRIPTION_FILES_GIT_REF:=master}
 
 rm -rf $BUILD_DIR
 mkdir -p $BUILD_DIR
