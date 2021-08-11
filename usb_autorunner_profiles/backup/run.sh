@@ -102,10 +102,13 @@ EOF
 echo "⚙️ Fetch Odoo database credentials"
 odoo_user=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_USER' | tr -d '"'`
 odoo_password=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_PASSWORD' | tr -d '"'`
+odoo_database=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_NAME' | tr -d '"'`
 
 echo "⚙️ Fetch OpenELIS database credentials"
 openelis_user=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_USER' | tr -d '"'`
 openelis_password=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_PASSWORD' | tr -d '"'`
+openelis_database=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_NAME' | tr -d '"'`
+
 
 echo "⚙️ Run PostgreSQL backup jobs"
 # Backup PostgreSQL Databases
@@ -131,7 +134,7 @@ spec:
           - name: DB_HOST
             value: postgres
           - name: DB_NAME
-            value: odoo
+            value: ${odoo_database}
           - name: DB_USERNAME
             value: ${odoo_user}
           - name: DB_PASSWORD
@@ -165,11 +168,11 @@ spec:
           - name: DB_HOST
             value: postgres
           - name: DB_NAME
-            value: clinlims
+            value: ${openelis_database}
           - name: DB_USERNAME
-            value: clinlims
+            value: ${openelis_user}
           - name: DB_PASSWORD
-            value: clinlims
+            value: ${openelis_password}
         volumeMounts:
         - name: backup-path
           mountPath: /opt/backup
