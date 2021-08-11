@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-DISTRO_NAME=c2c
-DISTRO_VERSION=1.0.2
-DISTRO_REVISION=1.0.2
+: "${DISTRO_NAME=bahmni-distro-c2c}"
+: "${DISTRO_VERSION=1.0.2}"
+: "${DISTRO_REVISION:=1.0.2}"
 MAVEN_REPO=https://nexus.mekomsolutions.net/repository/maven-releases
-DISTRO_URL=$MAVEN_REPO/net/mekomsolutions/bahmni-distro-$DISTRO_NAME/$DISTRO_VERSION/bahmni-distro-$DISTRO_NAME-$DISTRO_REVISION.zip
+DISTRO_URL=$MAVEN_REPO/net/mekomsolutions/$DISTRO_NAME/$DISTRO_VERSION/$DISTRO_NAME-$DISTRO_REVISION.zip
 
 PVC_MOUNTER_IMAGE=mdlh/alpine-rsync:3.11-3.1-1
 
