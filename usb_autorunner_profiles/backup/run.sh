@@ -219,6 +219,6 @@ spec:
 EOF
 
 echo "⏱ Wait for backup to be ready"
-sleep 1800
+sleep 3600
 
 echo "✅ Done."
