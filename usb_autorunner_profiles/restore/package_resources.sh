@@ -14,7 +14,6 @@ ARCHIVE_PATH=$BASE_DIR/archive
 RESOURCES_DIR=$BASE_DIR/target/resources
 IMAGES_FILE=$BUILD_DIR/images.txt
 VALUES_FILE=$BUILD_DIR/k8s-description-files/src/bahmni-helm/values.yaml
-DISTRO_VALUES_FILE=$BASE_DIR/k8s-services.yml
 DEPLOYMENT_VALUES_FILE=$BASE_DIR/deployment-values.yml
 : {K8S_DESCRIPTION_FILES_GIT_REF:=master}
 

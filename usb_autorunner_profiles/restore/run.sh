@@ -34,9 +34,11 @@ POSTGRES_DB_USERNAME=`$kubectl get configmap postgres-configs -o json | jq '.dat
 POSTGRES_DB_PASSWORD=`$kubectl get configmap postgres-configs -o json | jq '.data.POSTGRES_PASSWORD' | tr -d '"'`
 ODOO_DB_USERNAME=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_USER' | tr -d '"'`
 ODOO_DB_PASSWORD=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_PASSWORD' | tr -d '"'`
+OPENELIS_DB_USERNAME=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_USER' | tr -d '"'`
+OPENELIS_PASSWORD=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_PASSWORD' | tr -d '"'`
 OPENMRS_DB_NAME=openmrs
 ODOO_DB_NAME=odoo
-OPENELIS_DBNAME=clinlims
+OPENELIS_DBNAME=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_NAME' | tr -d '"'`
 
 echo "Remove previous job, if exists"
 $kubectl delete --ignore-not-found=true job ${OPENMRS_JOB_NAME}
@@ -105,14 +107,14 @@ data:
       PGPASSWORD=$POSTGRES_DB_PASSWORD psql -h postgres -v ON_ERROR_STOP=1 --username "$POSTGRES_DB_USERNAME" postgres <<-EOSQL
           CREATE USER \$user WITH UNENCRYPTED PASSWORD '\$password';
           ALTER USER \$user CREATEDB;
-          CREATE DATABASE clinlims;
-          GRANT ALL PRIVILEGES ON DATABASE clinlims TO \$user;
+          CREATE DATABASE $OPENELIS_DBNAME;
+          GRANT ALL PRIVILEGES ON DATABASE $OPENELIS_DBNAME TO \$user;
     EOSQL
     }
 
-    PGPASSWORD=$POSTGRES_DB_PASSWORD psql -h postgres --username $POSTGRES_USER postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$ODOO_DB_USERNAME'" | grep -q 1 ||  create_user clinlims clinlims
+    PGPASSWORD=$POSTGRES_DB_PASSWORD psql -h postgres --username $POSTGRES_USER postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$ODOO_DB_USERNAME'" | grep -q 1 ||  create_user $OPENELIS_DB_USERNAME $OPENELIS_DB_PASSWORD
     set +e
-    PGPASSWORD=password pg_restore -hpostgres -U clinlims -d clinlims < /opt/clinlims.tar
+    PGPASSWORD=password pg_restore -hpostgres -U $OPENELIS_DB_USERNAME -d $OPENELIS_DB_PASSWORD < /opt/clinlims.tar
     echo "Success."
 EOF
 
@@ -280,6 +282,7 @@ echo "🕐 Wait for jobs to complete... (timeout=1h)"
 $kubectl wait --for=condition=complete --timeout 3600s job/${FILESTORE_JOB_NAME}
 $kubectl wait --for=condition=complete --timeout 3600s job/${ODOO_JOB_NAME}
 $kubectl wait --for=condition=complete --timeout 3600s job/${OPENMRS_JOB_NAME}
+$kubectl wait --for=condition=complete --timeout 3600s job/${OPENELIS_JOB_NAME}
 echo "OpenMRS database restore Completed."
 
 echo "✅ Done."

@@ -1,7 +1,0 @@
-apps:
-  mysql:
-    enabled: true
-  postgresql:
-    enabled: true
-  odoo:
-    enabled: true
