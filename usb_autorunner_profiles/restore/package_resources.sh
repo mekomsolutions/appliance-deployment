@@ -74,7 +74,7 @@ set -e
 # Copy resources
 mkdir -p $RESOURCES_DIR/db_resources
 echo "⚙️ Copy K8s description files..."
-cp -r $BUILD_DIR/k8s/bahmni-helm/templates/common/* $BUILD_DIR/k8s/bahmni-helm/templates/configs/* $BUILD_DIR/k8s/bahmni-helm/templates/apps/mysql $BUILD_DIR/k8s/bahmni-helm/templates/apps/postgresql $BUILD_DIR/k8s/bahmni-helm/templates/apps/odoo/odoo-config.yml $RESOURCES_DIR/db_resources
+cp -r $BUILD_DIR/k8s/bahmni-helm/templates/common/* $BUILD_DIR/k8s/bahmni-helm/templates/configs/* $BUILD_DIR/k8s/bahmni-helm/templates/apps/mysql $BUILD_DIR/k8s/bahmni-helm/templates/apps/postgresql $BUILD_DIR/k8s/bahmni-helm/templates/apps/odoo/odoo-config.yml $BUILD_DIR/k8s/bahmni-helm/templates/apps/openmrs/openmrs-configs.yml $BUILD_DIR/k8s/bahmni-helm/templates/apps/openelis/openelis-config.yaml $RESOURCES_DIR/db_resources
 echo "⚙️ Copy 'run.sh' and 'utils/'..."
 cp -R $BASE_DIR/run.sh $UTILS_PATH $BUILD_DIR/images $RESOURCES_DIR/
 echo "⚙️ Copy archive files..."

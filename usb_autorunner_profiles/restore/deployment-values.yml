@@ -8,3 +8,7 @@ apps:
     enabled: true
   odoo:
     enabled: true
+  openmrs:
+    enabled: true
+  openelis:
+    enabled: true

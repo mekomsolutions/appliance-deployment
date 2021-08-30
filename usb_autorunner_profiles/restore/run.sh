@@ -50,7 +50,7 @@ $kubectl delete --ignore-not-found=true job ${ODOO_JOB_NAME}
 $kubectl delete --ignore-not-found=true job ${OPENELIS_JOB_NAME}
 $kubectl delete --ignore-not-found=true job ${FILESTORE_JOB_NAME}
 
-echo "⚙️  Add ConfigMap for restore scripts""
+echo "⚙️  Add ConfigMap for restore scripts"
 cat <<EOF | $kubectl apply -f -
 apiVersion: v1
 kind: ConfigMap
@@ -232,7 +232,7 @@ spec:
       containers:
       - name: openelis-db-restore
         image: ${REGISTRY_IP}/mekomsolutions/postgres_backup:9ab7a24
-        command: ["bash", "/script/openelis_restore_script.sh"]
+        command: ["bash", "/script/clinlims_restore_script.sh"]
         env:
         volumeMounts:
         - name: restore-storage
@@ -270,7 +270,7 @@ spec:
         persistentVolumeClaim:
           claimName: data-pvc
       containers:
-      - name: mysql-db-restore
+      - name: filestore-db-restore
         image: ${REGISTRY_IP}/mekomsolutions/postgres_backup:9ab7a24
         command: ["unzip"]
         args: ["/opt/filestore.zip", "-o", "-d", "/filestore"]
