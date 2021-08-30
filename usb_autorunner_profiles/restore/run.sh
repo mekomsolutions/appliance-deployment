@@ -30,22 +30,27 @@ $kubectl apply -R -f $DB_RESOURCES_PATH
 echo "⚙️  Fetch MySQL credentials"
 MYSQL_DB_USERNAME=`$kubectl get configmap mysql-configs -o json | jq '.data.MYSQL_ROOT_USER' | tr -d '"'`
 MYSQL_DB_PASSWORD=`$kubectl get configmap mysql-configs -o json | jq '.data.MYSQL_ROOT_PASSWORD' | tr -d '"'`
+echo "⚙️  Fetch PostgreSQL credentials"
 POSTGRES_DB_USERNAME=`$kubectl get configmap postgres-configs -o json | jq '.data.POSTGRES_USER' | tr -d '"'`
 POSTGRES_DB_PASSWORD=`$kubectl get configmap postgres-configs -o json | jq '.data.POSTGRES_PASSWORD' | tr -d '"'`
+echo "⚙️  Fetch Odoo database credentials"
 ODOO_DB_USERNAME=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_USER' | tr -d '"'`
 ODOO_DB_PASSWORD=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_PASSWORD' | tr -d '"'`
+echo "⚙️  Fetch OpenELIS database credentials"
 OPENELIS_DB_USERNAME=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_USER' | tr -d '"'`
 OPENELIS_PASSWORD=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_PASSWORD' | tr -d '"'`
-OPENMRS_DB_NAME=openmrs
-ODOO_DB_NAME=odoo
+echo "⚙️  Fetch database names"
+OPENMRS_DB_NAME=`$kubectl get configmap openmrs-configs -o json | jq '.data.OPENMRS_DB_NAME' | tr -d '"'`
+ODOO_DB_NAME=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_NAME' | tr -d '"'`
 OPENELIS_DBNAME=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_NAME' | tr -d '"'`
 
-echo "Remove previous job, if exists"
+echo "Remove previous jobs, if exists"
 $kubectl delete --ignore-not-found=true job ${OPENMRS_JOB_NAME}
 $kubectl delete --ignore-not-found=true job ${ODOO_JOB_NAME}
 $kubectl delete --ignore-not-found=true job ${OPENELIS_JOB_NAME}
 $kubectl delete --ignore-not-found=true job ${FILESTORE_JOB_NAME}
-echo "⚙️  Add restore scripts"
+
+echo "⚙️  Add ConfigMap for restore scripts""
 cat <<EOF | $kubectl apply -f -
 apiVersion: v1
 kind: ConfigMap
