@@ -13,6 +13,8 @@ List of profiles:
 - backup
 - deploy
 - restore
+- sysinfo
+- troubleshoot
 
 Copy the output artifacts `autorun.zip.enc` and `secret.key.enc` at the root of any USB key.
 
@@ -31,6 +33,9 @@ It needs to be given the following variable to work:
 | `DISTRO_REVISION`  | None    | Eg, "1.0.3"             |
 | `K8S_DESCRIPTION_FILES_GIT_REF`  | `master`   | The Git revision of the K8s files to be used for deployment. Eg, "7a1e77398560b914ba4a02e19f2b066d55c1347f"             |
 
+## 'troubleshoot' profile
+This is a generic profile that will execute a provided 'run.sh' script in the appliance
+The file should be placed in the profile subfolder [`script/`](usb_autorunner_profiles/troubleshoot/script/)
 
 ### Dependencies
 
