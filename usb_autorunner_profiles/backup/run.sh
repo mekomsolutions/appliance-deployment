@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-DISTRO_NAME=c2c
 kubectl="/usr/local/bin/k3s kubectl"
 # Get NFS IP address
 registry_ip=`$kubectl get svc registry-service -o json | jq '.spec.loadBalancerIP' | tr -d '"'`
