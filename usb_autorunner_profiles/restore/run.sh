@@ -3,7 +3,6 @@ set -e
 
 kubectl="/usr/local/bin/k3s kubectl"
 PWD=$(dirname "$0")
-REGISTRY_IP=10.0.90.99
 : "${NAMESPACE:=default}"
 
 OPENMRS_JOB_NAME=openmrs-db-restore
@@ -19,6 +18,10 @@ echo "🗂  Initialize local storage folders."
 # Create data volumes
 mkdir -p $SSD_MOUNT_POINT/data/postgresql
 mkdir -p $SSD_MOUNT_POINT/data/mysql
+
+# Retrieve Docker registry IP address
+echo "🗂  Retrieve Docker registry IP."
+REGISTRY_IP=`$kubectl get svc registry-service -o json | jq '.spec.loadBalancerIP' | tr -d '"'`
 
 # sync images to registry
 echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
@@ -159,7 +162,7 @@ spec:
         - name: restore-storage
           mountPath: /opt/
         - name: restore-script
-          mountPath: /script  
+          mountPath: /script
       restartPolicy: Never
 EOF
 

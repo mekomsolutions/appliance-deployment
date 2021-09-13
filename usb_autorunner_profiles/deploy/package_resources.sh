@@ -14,6 +14,7 @@ VALUES_FILE=$BUILD_DIR/k8s-description-files/src/bahmni-helm/values.yaml
 DISTRO_VALUES_FILE=$RESOURCES_DIR/distro/k8s-services.yml
 DEPLOYMENT_VALUES_FILE=$BASE_DIR/deployment-values.yml
 : {K8S_DESCRIPTION_FILES_GIT_REF:=master}
+: ${K8S_DESCRIPTION_FILES_GIT_REF:=master}
 
 rm -rf $BUILD_DIR
 mkdir -p $BUILD_DIR
