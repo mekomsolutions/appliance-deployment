@@ -235,5 +235,5 @@ $kubectl wait --for=condition=complete --timeout 3600s job/${OPENMRS_JOB_NAME}
 $kubectl wait --for=condition=complete --timeout 3600s job/${ODOO_JOB_NAME}
 $kubectl wait --for=condition=complete --timeout 3600s job/${OPENELIS_JOB_NAME}
 $kubectl wait --for=condition=complete --timeout 3600s job/${FILESTORE_JOB_NAME}
-$kubectl wait --for=condition=complete --timeout 3600s job/${LOGGING_JOB_NAME}
+$kubectl -n rsyslog wait --for=condition=complete --timeout 3600s job/${LOGGING_JOB_NAME}
 echo "✅ Restore complete."
