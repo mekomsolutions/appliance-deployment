@@ -40,7 +40,7 @@ The profile support restoring the following:
 - OpenELIS database: `clinlims.tar`
 - filestore: `filestore.zip`
 Files should be placed in the `archive/` folder.
- 
+
 It needs to be given the following variable to work:
 
 | Variable name      | Default |      Description        |
@@ -54,7 +54,7 @@ It needs to be given the following variable to work:
 
 ### Dependencies
 
-- yq
-- skopeo
-- helm
+- yq (Attention: there are 2 `yq`. Use the Pip3 one: https://kislyuk.github.io/yq/)
+- Skopeo
+- Helm
 - openssl

@@ -5,10 +5,12 @@ kubectl="/usr/local/bin/k3s kubectl"
 PWD=$(dirname "$0")
 : "${NAMESPACE:=default}"
 
+# K8s jobs nmames
 OPENMRS_JOB_NAME=openmrs-db-restore
 ODOO_JOB_NAME=odoo-db-restore
 OPENELIS_JOB_NAME=openelis-db-restore
 FILESTORE_JOB_NAME=filestore-restore
+
 OPENMRS_SERVICE_NAME=openmrs
 AUTORUNNER_WORKDIR=/opt/autorunner/workdir
 ARCHIVE_PATH=${AUTORUNNER_WORKDIR}/archive
