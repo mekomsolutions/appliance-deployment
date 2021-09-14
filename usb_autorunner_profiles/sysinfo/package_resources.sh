@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 
 PWD=$(dirname "$0")
 RESOURCES_DIR=$PWD/target/resources
