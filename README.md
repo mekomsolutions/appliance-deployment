@@ -13,23 +13,12 @@ List of profiles:
 - backup
 - deploy
 - restore
+- sysinfo
+- troubleshoot
 
 Copy the output artifacts `autorun.zip.enc` and `secret.key.enc` at the root of any USB key.
 
 This will be ready to be plugged on one of the appliance nodes
-
-## 'deploy' profile
-
-This is a generic profile that will download and package all binaries and configurations needed to run the application on the appliance.
-
-It needs to be given the following variable to work:
-
-| Variable name      | Default |      Description        |
-|--------------------|---------|:-----------------------:|
-| `DISTRO_NAME`      | None    | Eg, "bahmni-distro-c2c" |
-| `DISTRO_VERSION`   | None    | Eg, "1.0.3"             |
-| `DISTRO_REVISION`  | None    | Eg, "1.0.3"             |
-| `K8S_DESCRIPTION_FILES_GIT_REF`  | `master`   | The Git revision of the K8s files to be used for deployment. Eg, "7a1e77398560b914ba4a02e19f2b066d55c1347f"             |
 
 ## 'restore' profile
 
@@ -50,7 +39,26 @@ It needs to be given the following variable to work:
 | `DISTRO_REVISION`  | None    | Eg, "1.0.3"             |
 | `K8S_DESCRIPTION_FILES_GIT_REF`  | `master`   | The Git revision of the K8s files to be used for deployment. Eg, "7a1e77398560b914ba4a02e19f2b066d55c1347f"
 
+## 'deploy' profile
 
+This is a generic profile that will download and package all binaries and configurations needed to run the application on the appliance.
+
+It needs to be given the following variable to work:
+
+| Variable name      | Default |      Description        |
+|--------------------|---------|:-----------------------:|
+| `DISTRO_NAME`      | None    | Eg, "bahmni-distro-c2c" |
+| `DISTRO_VERSION`   | None    | Eg, "1.0.3"             |
+| `DISTRO_REVISION`  | None    | Eg, "1.0.3"             |
+| `K8S_DESCRIPTION_FILES_GIT_REF`  | `master`   | The Git revision of the K8s files to be used for deployment. Eg, "7a1e77398560b914ba4a02e19f2b066d55c1347f"             |
+
+## 'troubleshoot' profile
+
+Profile used to package any script of your choice that should be run on an appliance.
+
+This is especially usefully for single time troubleshooting operations on a production server. For instance to run a script that applies a database fix, restarts a given service, or any operation really.
+
+No script is provided by default, therefore one must provide one and drop it in the script/ folder. You can have a look at other profiles **run.sh** scripts to get a starting point.
 
 ### Dependencies
 
