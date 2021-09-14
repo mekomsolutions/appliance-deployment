@@ -16,9 +16,9 @@ List of profiles:
 - sysinfo
 - troubleshoot
 
-Copy the output artifacts `autorun.zip.enc` and `secret.key.enc` at the root of any USB key.
+Output artifacts `autorun.zip.enc` and `secret.key.enc` will be zipped in a file named **<profile_name>-<git_commit_id>.zip**, ready to be sent and extracted onto a USB key.
 
-This will be ready to be plugged on one of the appliance nodes
+The USB key can then be plugged on an appliance.
 
 ## 'restore' profile
 
@@ -59,6 +59,11 @@ Profile used to package any script of your choice that should be run on an appli
 This is especially usefully for single time troubleshooting operations on a production server. For instance to run a script that applies a database fix, restarts a given service, or any operation really.
 
 No script is provided by default, therefore one must provide one and drop it in the script/ folder. You can have a look at other profiles **run.sh** scripts to get a starting point.
+
+## 'sysinfo' profile
+
+Profile used to retrieve some system information to facilitate troubleshooting.
+
 
 ### Dependencies
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 
 PROFILE_DIR=$(dirname "$0")
 BUILD_DIR=$PROFILE_DIR/target/build

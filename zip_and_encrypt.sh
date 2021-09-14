@@ -8,6 +8,9 @@ TARGET_DIR=$PROJECT_DIR/target
 BUILD_DIR=$TARGET_DIR/build
 
 rm -rf $TARGET_DIR
+mkdir -p $TARGET_DIR
+
+rm -rf $BUILD_DIR
 mkdir -p $BUILD_DIR
 
 echo "⚙️ Run 'package_resources.sh'..."
@@ -25,6 +28,12 @@ openssl rsautl -encrypt -oaep -pubin -inkey $PROJECT_DIR/certificates/public.pem
 echo "🔐 Encrypt 'autorun.zip' file..."
 openssl enc -aes-256-cbc -md sha256 -in $BUILD_DIR/autorun.zip -out $TARGET_DIR/autorun.zip.enc -pass file:$BUILD_DIR/secret.key
 
+git_ref=$(git rev-parse --short HEAD)
+final_filename=$1-${git_ref}.zip
+echo "🗜 Zip all in '$1-${git_ref}.zip' file..."
+cd $TARGET_DIR
+zip ${final_filename} autorun.zip.enc secret.key.enc
+
 echo "✅ USB Autorunner packagaging is done successfully."
-echo "ℹ️ Files can be found in '$BUILD_DIR/'"
-ls $TARGET_DIR/*enc
+echo ""
+echo "ℹ️ File: $TARGET_DIR/$final_filename"
