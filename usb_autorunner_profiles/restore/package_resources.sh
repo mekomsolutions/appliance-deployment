@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Fail on first error:
+set -e
+
 PROFILE_DIR=$(dirname "$0")
 BUILD_DIR=$PROFILE_DIR/target/build
 BUILD_RESOURCES_DIR=$PROFILE_DIR/target/resources

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Fail on first error:
+set -e
+
 MAVEN_REPO=https://nexus.mekomsolutions.net/repository/maven-releases
 DISTRO_URL=$MAVEN_REPO/net/mekomsolutions/$DISTRO_NAME/$DISTRO_VERSION/$DISTRO_NAME-$DISTRO_REVISION.zip
 

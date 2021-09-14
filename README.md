@@ -60,6 +60,15 @@ This is especially usefully for single time troubleshooting operations on a prod
 
 No script is provided by default, therefore one must provide one and drop it in the script/ folder. You can have a look at other profiles **run.sh** scripts to get a starting point.
 
+## 'backup' profile
+
+Profile used to backup specific services on an appliance. Currently supported services are:
+- OpenMRS database
+- OpenELIS database
+- Odoo database
+- Odoo filestore
+- Logging service
+
 ## 'sysinfo' profile
 
 Profile used to retrieve some system information to facilitate troubleshooting.

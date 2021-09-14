@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 
 kubectl="/usr/local/bin/k3s kubectl"
 # Get NFS IP address
