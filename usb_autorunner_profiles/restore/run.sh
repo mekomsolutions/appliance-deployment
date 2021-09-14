@@ -3,33 +3,137 @@ set -e
 
 kubectl="/usr/local/bin/k3s kubectl"
 PWD=$(dirname "$0")
-REGISTRY_IP=10.0.90.99
 : "${NAMESPACE:=default}"
 
-JOB_NAME=openmrs-db-restore
+# K8s jobs nmames
+OPENMRS_JOB_NAME=openmrs-db-restore
+ODOO_JOB_NAME=odoo-db-restore
+OPENELIS_JOB_NAME=openelis-db-restore
+FILESTORE_JOB_NAME=filestore-restore
+
 OPENMRS_SERVICE_NAME=openmrs
 AUTORUNNER_WORKDIR=/opt/autorunner/workdir
-ARCHIVE_PATH=${AUTORUNNER_WORKDIR}/dump.sql
+ARCHIVE_PATH=${AUTORUNNER_WORKDIR}/archive
+DB_RESOURCES_PATH=${AUTORUNNER_WORKDIR}/db_resources
 
-mysql_app=`$kubectl get statefulsets.apps | grep 'mysql'`
-if [ -n "$mysql_app" ] ; then
-  echo "⚙️  Fetch MySQL credentials"
-  DB_USERNAME=`$kubectl get configmap mysql-configs -o json | jq '.data.MYSQL_ROOT_USER' | tr -d '"'`
-  DB_PASSWORD=`$kubectl get configmap mysql-configs -o json | jq '.data.MYSQL_ROOT_PASSWORD' | tr -d '"'`
-  DB_NAME=openmrs
+echo "🗂  Initialize local storage folders."
+# Create data volumes
+mkdir -p $SSD_MOUNT_POINT/data/postgresql
+mkdir -p $SSD_MOUNT_POINT/data/mysql
 
-  echo "Remove previous job, if exists"
-  $kubectl delete --ignore-not-found=true job ${JOB_NAME}
+# Retrieve Docker registry IP address
+echo "🗂  Retrieve Docker registry IP."
+REGISTRY_IP=`$kubectl get svc registry-service -o json | jq '.spec.loadBalancerIP' | tr -d '"'`
 
-  echo "Stop the OpenMRS service"
-  $kubectl scale deployment ${OPENMRS_SERVICE_NAME} --replicas 0
+# sync images to registry
+echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
+skopeo sync --scoped --dest-tls-verify=false --src dir --dest docker $PWD/images/docker.io $REGISTRY_IP
 
-  echo "⚙️  Run MySQL restore job"
-  cat <<EOF | $kubectl apply -f -
+echo "⚙️  Apply K8s description files"
+$kubectl apply -R -f $DB_RESOURCES_PATH
+
+echo "⚙️  Fetch MySQL credentials"
+MYSQL_DB_USERNAME=`$kubectl get configmap mysql-configs -o json | jq '.data.MYSQL_ROOT_USER' | tr -d '"'`
+MYSQL_DB_PASSWORD=`$kubectl get configmap mysql-configs -o json | jq '.data.MYSQL_ROOT_PASSWORD' | tr -d '"'`
+echo "⚙️  Fetch PostgreSQL credentials"
+POSTGRES_DB_USERNAME=`$kubectl get configmap postgres-configs -o json | jq '.data.POSTGRES_USER' | tr -d '"'`
+POSTGRES_DB_PASSWORD=`$kubectl get configmap postgres-configs -o json | jq '.data.POSTGRES_PASSWORD' | tr -d '"'`
+echo "⚙️  Fetch Odoo database credentials"
+ODOO_DB_USERNAME=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_USER' | tr -d '"'`
+ODOO_DB_PASSWORD=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_PASSWORD' | tr -d '"'`
+echo "⚙️  Fetch OpenELIS database credentials"
+OPENELIS_DB_USERNAME=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_USER' | tr -d '"'`
+OPENELIS_PASSWORD=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_PASSWORD' | tr -d '"'`
+echo "⚙️  Fetch database names"
+OPENMRS_DB_NAME=`$kubectl get configmap openmrs-configs -o json | jq '.data.OPENMRS_DB_NAME' | tr -d '"'`
+ODOO_DB_NAME=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_NAME' | tr -d '"'`
+OPENELIS_DBNAME=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_NAME' | tr -d '"'`
+
+echo "Remove previous jobs, if exists"
+$kubectl delete --ignore-not-found=true job ${OPENMRS_JOB_NAME}
+$kubectl delete --ignore-not-found=true job ${ODOO_JOB_NAME}
+$kubectl delete --ignore-not-found=true job ${OPENELIS_JOB_NAME}
+$kubectl delete --ignore-not-found=true job ${FILESTORE_JOB_NAME}
+
+echo "⚙️  Add ConfigMap for restore scripts"
+cat <<EOF | $kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openmrs-restore-script
+data:
+  openmrs_restore_script.sh: |
+    #!/bin/bash
+    set -eu
+
+    mysql -u$MYSQL_DB_USERNAME -hmysql -p$MYSQL_DB_PASSWORD -e "CREATE DATABASE IF NOT EXISTS $OPENMRS_DB_NAME;"
+
+    mysql -hmysql -u${MYSQL_DB_USERNAME} -p${MYSQL_DB_PASSWORD} ${OPENMRS_DB_NAME} -e "SOURCE /opt/openmrs.sql; SOURCE /opt/rebuild_index.sql;"
+    echo "Success."
+EOF
+
+cat <<EOF | $kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: odoo-restore-script
+data:
+  odoo_restore_script.sh: |
+    #!/bin/bash
+    set -eu
+
+    function create_user() {
+      local user=\$1
+      local password=\$2
+      echo "Creating '\$user' user..."
+      PGPASSWORD=$POSTGRES_DB_PASSWORD psql -h postgres -v ON_ERROR_STOP=1 --username "$POSTGRES_DB_USERNAME" postgres <<-EOSQL
+          CREATE USER \$user WITH UNENCRYPTED PASSWORD '\$password';
+          ALTER USER \$user CREATEDB;
+          CREATE DATABASE $ODOO_DB_NAME;
+          GRANT ALL PRIVILEGES ON DATABASE $ODOO_DB_NAME TO \$user;
+    EOSQL
+    }
+
+    PGPASSWORD=$POSTGRES_DB_PASSWORD psql -h postgres --username $POSTGRES_USER postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$ODOO_DB_USERNAME'" | grep -q 1 ||  create_user ${ODOO_DB_USERNAME} ${ODOO_DB_PASSWORD}
+    set +e
+    PGPASSWORD=password pg_restore -hpostgres -U odoo -d odoo < /opt/odoo.tar
+    echo "Success."
+EOF
+
+cat <<EOF | $kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openelis-restore-script
+data:
+  clinlims_restore_script.sh: |
+    #!/bin/bash
+    set -eu
+
+    function create_user() {
+      local user=\$1
+      local password=\$2
+      echo "Creating '\$user' user..."
+      PGPASSWORD=$POSTGRES_DB_PASSWORD psql -h postgres -v ON_ERROR_STOP=1 --username "$POSTGRES_DB_USERNAME" postgres <<-EOSQL
+          CREATE USER \$user WITH UNENCRYPTED PASSWORD '\$password';
+          ALTER USER \$user CREATEDB;
+          CREATE DATABASE $OPENELIS_DBNAME;
+          GRANT ALL PRIVILEGES ON DATABASE $OPENELIS_DBNAME TO \$user;
+    EOSQL
+    }
+
+    PGPASSWORD=$POSTGRES_DB_PASSWORD psql -h postgres --username $POSTGRES_USER postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$ODOO_DB_USERNAME'" | grep -q 1 ||  create_user $OPENELIS_DB_USERNAME $OPENELIS_DB_PASSWORD
+    set +e
+    PGPASSWORD=password pg_restore -hpostgres -U $OPENELIS_DB_USERNAME -d $OPENELIS_DB_PASSWORD < /opt/clinlims.tar
+    echo "Success."
+EOF
+
+echo "⚙️  Run MySQL restore job"
+cat <<EOF | $kubectl apply -f -
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "${JOB_NAME}"
+  name: "${OPENMRS_JOB_NAME}"
   labels:
     app: db-restore
 spec:
@@ -47,28 +151,148 @@ spec:
       volumes:
       - name: restore-storage
         hostPath:
-          path: ${AUTORUNNER_WORKDIR}
+          path: ${ARCHIVE_PATH}
+      - name: restore-script
+        configMap:
+          name: openmrs-restore-script
       containers:
       - name: mysql-db-restore
-        image: 10.0.90.99/mekomsolutions/mysql_backup:9ab7a24
-        command: ["mysql"]
-        args: ["-hmysql", "-u${DB_USERNAME}", "-p${DB_PASSWORD}", "${DB_NAME}", "-e", "SOURCE /opt/dump.sql; SOURCE /opt/rebuild_index.sql;"]
+        image: ${REGISTRY_IP}/mekomsolutions/mysql_backup:9ab7a24
+        command: ["bash", "/script/openmrs_restore_script.sh"]
         env:
         volumeMounts:
         - name: restore-storage
           mountPath: /opt/
+        - name: restore-script
+          mountPath: /script
       restartPolicy: Never
 EOF
-  echo "🕐 Wait for the job to complete... (timeout=1h)"
-  $kubectl wait --for=condition=complete --timeout 3600s job/${JOB_NAME}
-  echo "Completed."
 
-  echo "🚀 Start OpenMRS service"
-  $kubectl scale deployment ${OPENMRS_SERVICE_NAME} --replicas 1
+echo "⚙️  Run PostgreSQL restore jobs"
+cat <<EOF | $kubectl apply -f -
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "${ODOO_JOB_NAME}"
+  labels:
+    app: db-restore
+spec:
+  template:
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - database
+      volumes:
+      - name: restore-storage
+        hostPath:
+          path: ${ARCHIVE_PATH}
+      - name: restore-script
+        configMap:
+          name: odoo-restore-script
+      containers:
+      - name: odoo-db-restore
+        image: ${REGISTRY_IP}/mekomsolutions/postgres_backup:9ab7a24
+        command: ["bash", "/script/odoo_restore_script.sh"]
+        env:
+        volumeMounts:
+        - name: restore-storage
+          mountPath: /opt/
+        - name: restore-script
+          mountPath: /script
+      restartPolicy: Never
+EOF
 
-else
-  echo "⚠️  MySQL service is not found, abort"
-  exit 1
-fi
+cat <<EOF | $kubectl apply -f -
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "${OPENELIS_JOB_NAME}"
+  labels:
+    app: db-restore
+spec:
+  template:
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - database
+      volumes:
+      - name: restore-storage
+        hostPath:
+          path: ${ARCHIVE_PATH}
+      - name: restore-script
+        configMap:
+          name: openelis-restore-script
+      containers:
+      - name: openelis-db-restore
+        image: ${REGISTRY_IP}/mekomsolutions/postgres_backup:9ab7a24
+        command: ["bash", "/script/clinlims_restore_script.sh"]
+        env:
+        volumeMounts:
+        - name: restore-storage
+          mountPath: /opt/
+        - name: restore-script
+          mountPath: /script
+      restartPolicy: Never
+EOF
+
+echo "⚙️  Run Filestore restore job"
+cat <<EOF | $kubectl apply -f -
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "${FILESTORE_JOB_NAME}"
+  labels:
+    app: db-restore
+spec:
+  template:
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - database
+      volumes:
+      - name: restore-storage
+        hostPath:
+          path: ${ARCHIVE_PATH}
+      - name: filestore
+        persistentVolumeClaim:
+          claimName: data-pvc
+      containers:
+      - name: filestore-db-restore
+        image: ${REGISTRY_IP}/mekomsolutions/postgres_backup:9ab7a24
+        command: ["unzip"]
+        args: ["/opt/filestore.zip", "-o", "-d", "/filestore"]
+        env:
+        volumeMounts:
+        - name: restore-storage
+          mountPath: /opt
+        - name: filestore
+          mountPath: /filestore
+      restartPolicy: Never
+EOF
+
+echo "🕐 Wait for jobs to complete... (timeout=1h)"
+$kubectl wait --for=condition=complete --timeout 3600s job/${FILESTORE_JOB_NAME}
+$kubectl wait --for=condition=complete --timeout 3600s job/${ODOO_JOB_NAME}
+$kubectl wait --for=condition=complete --timeout 3600s job/${OPENMRS_JOB_NAME}
+$kubectl wait --for=condition=complete --timeout 3600s job/${OPENELIS_JOB_NAME}
+echo "OpenMRS database restore Completed."
 
 echo "✅ Done."

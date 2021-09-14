@@ -1,9 +1,22 @@
 #!/usr/bin/env bash
 
-DISTRO_NAME=c2c
 kubectl="/usr/local/bin/k3s kubectl"
-# Get NFS IP address
-registry_ip=`$kubectl get svc registry-service -o json | jq '.spec.loadBalancerIP' | tr -d '"'`
+
+AUTORUNNER_WORKDIR=/opt/autorunner/workdir
+OPENMRS_JOB_NAME=mysql-openmrs-db-backup
+ODOO_JOB_NAME=postgres-odoo-db-backup
+OPENELIS_JOB_NAME=postgres-openelis-db-backup
+FILESTORE_JOB_NAME=filestore-data-backup
+LOGGING_JOB_NAME=logging-data-backup
+
+# Retrieve Docker registry IP address
+echo "🗂  Retrieve Docker registry IP."
+REGISTRY_IP=`$kubectl get svc registry-service -o json | jq '.spec.loadBalancerIP' | tr -d '"'`
+
+# Sync images to registry
+echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
+skopeo sync --scoped --dest-tls-verify=false --src dir --dest docker $AUTORUNNER_WORKDIR/images/docker.io $REGISTRY_IP
+
 # Get USB mount point
 usb_mount_point=`grep "mount_point" /opt/autorunner/usbinfo | cut -d'=' -f2 | tr -d '"'`
 backup_folder=${usb_mount_point}/backup
@@ -22,7 +35,7 @@ cat <<EOF | $kubectl apply -f -
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: filestore-data-backup
+  name: "${FILESTORE_JOB_NAME}"
   labels:
     app: usb-backup
 spec:
@@ -37,7 +50,7 @@ spec:
             path: "${backup_folder}/filestore"
       containers:
       - name: data-backup
-        image: ${registry_ip}/mekomsolutions/filestore_backup:9ab7a24
+        image: ${REGISTRY_IP}/mekomsolutions/filestore_backup:9556d7c
         env:
           - name: FILESTORE_PATH
             value: /opt/data
@@ -52,7 +65,6 @@ spec:
         role: database
 EOF
 
-
 echo "⚙️ Fetch MySQL credentials"
 mysql_root_user=`$kubectl get configmap mysql-configs -o json | jq '.data.MYSQL_ROOT_USER' | tr -d '"'`
 mysql_root_password=`$kubectl get configmap mysql-configs -o json | jq '.data.MYSQL_ROOT_PASSWORD' | tr -d '"'`
@@ -65,7 +77,7 @@ cat <<EOF | $kubectl apply -f -
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: mysql-openmrs-db-backup
+  name: "${OPENMRS_JOB_NAME}"
   labels:
     app: usb-backup
 spec:
@@ -80,7 +92,7 @@ spec:
             path: "${backup_folder}"
       containers:
       - name: mysql-db-backup
-        image: ${registry_ip}/mekomsolutions/mysql_backup:9ab7a24
+        image: ${REGISTRY_IP}/mekomsolutions/mysql_backup:9556d7c
         env:
           - name: DB_NAME
             value: openmrs
@@ -117,7 +129,7 @@ cat <<EOF | $kubectl apply -f -
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: odoo-db-backup
+  name: "${ODOO_JOB_NAME}"
   labels:
     app: usb-backup
 spec:
@@ -129,7 +141,7 @@ spec:
             path: "${backup_folder}"
       containers:
       - name: postgres-db-backup
-        image: ${registry_ip}/mekomsolutions/postgres_backup:9ab7a24
+        image: ${REGISTRY_IP}/mekomsolutions/postgres_backup:9556d7c
         env:
           - name: DB_HOST
             value: postgres
@@ -151,7 +163,7 @@ cat <<EOF | $kubectl apply -f -
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: openelis-db-backup
+  name: "${OPENELIS_JOB_NAME}"
   labels:
     app: usb-backup
 spec:
@@ -163,7 +175,7 @@ spec:
             path: "${backup_folder}"
       containers:
       - name: postgres-db-backup
-        image: ${registry_ip}/mekomsolutions/postgres_backup:9ab7a24
+        image: ${REGISTRY_IP}/mekomsolutions/postgres_backup:9556d7c
         env:
           - name: DB_HOST
             value: postgres
@@ -188,7 +200,7 @@ cat <<EOF | $kubectl apply -n rsyslog -f -
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: logging-data-backup
+  name: "${LOGGING_JOB_NAME}"
   labels:
     app: usb-backup
 spec:
@@ -203,7 +215,7 @@ spec:
             path: "${backup_folder}/logging"
       containers:
       - name: data-backup
-        image: ${registry_ip}/mekomsolutions/filestore_backup:9ab7a24
+        image: ${REGISTRY_IP}/mekomsolutions/filestore_backup:9556d7c
         env:
           - name: FILESTORE_PATH
             value: /opt/data
@@ -218,7 +230,10 @@ spec:
         role: database
 EOF
 
-echo "⏱ Wait for backup to be ready"
-sleep 3600
-
-echo "✅ Done."
+echo "🕐 Wait for jobs to complete... (timeout=1h)"
+$kubectl wait --for=condition=complete --timeout 3600s job/${OPENMRS_JOB_NAME}
+$kubectl wait --for=condition=complete --timeout 3600s job/${ODOO_JOB_NAME}
+$kubectl wait --for=condition=complete --timeout 3600s job/${OPENELIS_JOB_NAME}
+$kubectl wait --for=condition=complete --timeout 3600s job/${FILESTORE_JOB_NAME}
+$kubectl -n rsyslog wait --for=condition=complete --timeout 3600s job/${LOGGING_JOB_NAME}
+echo "✅ Restore complete."
