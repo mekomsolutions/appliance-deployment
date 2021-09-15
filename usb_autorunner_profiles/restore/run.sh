@@ -32,7 +32,7 @@ echo "⚙️  Apply K8s description files"
 $kubectl apply -R -f $DB_RESOURCES_PATH
 
 echo "⚙️  Wait for database services to start"
-sleep 300
+sleep 180
 
 echo "⚙️  Fetch MySQL credentials"
 MYSQL_DB_USERNAME=`$kubectl get configmap mysql-configs -o json | jq '.data.MYSQL_ROOT_USER' | tr -d '"'`
