@@ -31,6 +31,9 @@ skopeo sync --scoped --dest-tls-verify=false --src dir --dest docker $PWD/images
 echo "⚙️  Apply K8s description files"
 $kubectl apply -R -f $DB_RESOURCES_PATH
 
+echo "⚙️  Wait for database services to start"
+sleep 180
+
 echo "⚙️  Fetch MySQL credentials"
 MYSQL_DB_USERNAME=`$kubectl get configmap mysql-configs -o json | jq '.data.MYSQL_ROOT_USER' | tr -d '"'`
 MYSQL_DB_PASSWORD=`$kubectl get configmap mysql-configs -o json | jq '.data.MYSQL_ROOT_PASSWORD' | tr -d '"'`
@@ -42,7 +45,7 @@ ODOO_DB_USERNAME=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_D
 ODOO_DB_PASSWORD=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_PASSWORD' | tr -d '"'`
 echo "⚙️  Fetch OpenELIS database credentials"
 OPENELIS_DB_USERNAME=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_USER' | tr -d '"'`
-OPENELIS_PASSWORD=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_PASSWORD' | tr -d '"'`
+OPENELIS_DB_PASSWORD=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_PASSWORD' | tr -d '"'`
 echo "⚙️  Fetch database names"
 OPENMRS_DB_NAME=`$kubectl get configmap openmrs-configs -o json | jq '.data.OPENMRS_DB_NAME' | tr -d '"'`
 ODOO_DB_NAME=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_NAME' | tr -d '"'`
@@ -95,7 +98,8 @@ data:
 
     PGPASSWORD=$POSTGRES_DB_PASSWORD psql -h postgres --username $POSTGRES_USER postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$ODOO_DB_USERNAME'" | grep -q 1 ||  create_user ${ODOO_DB_USERNAME} ${ODOO_DB_PASSWORD}
     set +e
-    PGPASSWORD=password pg_restore -hpostgres -U odoo -d odoo < /opt/odoo.tar
+    PGPASSWORD=$ODOO_DB_PASSWORD pg_restore -hpostgres -U $ODOO_DB_USERNAME -d $ODOO_DB_NAME < /opt/odoo.tar
+    PGPASSWORD=$ODOO_DB_PASSWORD psql -h postgres -U postgres -c "ALTER DATABASE $ODOO_DB_NAME OWNER TO $ODOO_DB_USERNAME;"
     echo "Success."
 EOF
 
@@ -121,9 +125,10 @@ data:
     EOSQL
     }
 
-    PGPASSWORD=$POSTGRES_DB_PASSWORD psql -h postgres --username $POSTGRES_USER postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$ODOO_DB_USERNAME'" | grep -q 1 ||  create_user $OPENELIS_DB_USERNAME $OPENELIS_DB_PASSWORD
+    PGPASSWORD=$POSTGRES_DB_PASSWORD psql -h postgres --username $POSTGRES_USER postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$OPENELIS_DB_USERNAME'" | grep -q 1 ||  create_user ${OPENELIS_DB_USERNAME} ${OPENELIS_DB_PASSWORD}
     set +e
-    PGPASSWORD=password pg_restore -hpostgres -U $OPENELIS_DB_USERNAME -d $OPENELIS_DB_PASSWORD < /opt/clinlims.tar
+    PGPASSWORD=$OPENELIS_DB_PASSWORD pg_restore -hpostgres -U $OPENELIS_DB_USERNAME -d $OPENELIS_DBNAME < /opt/clinlims.tar
+    PGPASSWORD=$POSTGRES_DB_PASSWORD psql -h postgres -U postgres -c "ALTER DATABASE clinlims OWNER TO clinlims;"
     echo "Success."
 EOF
 
