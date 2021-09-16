@@ -32,6 +32,7 @@ echo "⚙️  kubectl get pv"
 $kubectl get pv -o json > ${sysinfo_folder}/pv.json
 echo "⚙️  kubectl get pvc"
 $kubectl get pvc -o json > ${sysinfo_folder}/pvc.json
+$kubectl get pods -n rsyslog -o json > ${sysinfo_folder}/rsyslog_pods.json
 
 echo "⚙️  kubectl describe nodes"
 $kubectl describe nodes > ${sysinfo_folder}/nodes.txt
@@ -43,5 +44,7 @@ echo "⚙️  kubectl describe jobs"
 $kubectl describe jobs > ${sysinfo_folder}/jobs.txt
 echo "⚙️  kubectl describe pods"
 $kubectl describe pods > ${sysinfo_folder}/pods.txt
+echo "⚙️  kubectl describe rsyslog pods"
+$kubectl describe pods -n rsyslog > ${sysinfo_folder}/rsyslog_pods.txt
 
 echo "✅ Done."
