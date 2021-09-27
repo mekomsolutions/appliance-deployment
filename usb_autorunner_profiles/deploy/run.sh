@@ -40,9 +40,14 @@ echo "⚙️  Upload the distro..."
 # Sending distro to volume
 $PWD/utils/upload-files.sh $REGISTRY_IP/mdlh/alpine-rsync:3.11-3.1-1 $PWD/distro/ distro-pvc
 
-echo "🧽 Delete the 'openmrs' pod (will be recreated right after)"
-POD_NAME=$($kubectl_bin get pod -l app=openmrs -o jsonpath="{.items[0].metadata.name}" -n $NAMESPACE)
-$kubectl_bin delete pod $POD_NAME -n $NAMESPACE
+echo "🧽 Delete the current 'openmrs' pod"
+$kubectl_bin delete pods -l app=openmrs -n $NAMESPACE
+
+echo "🧽 Delete the current 'odoo' pod"
+$kubectl_bin delete pods -l app=odoo -n $NAMESPACE
+
+echo "🧽 Delete the current 'openelis' pod"
+$kubectl_bin delete pods -l app=openelis -n $NAMESPACE
 
 # Apply K8s description files
 echo "⚙️  Apply K8s description files: common/ ..."
