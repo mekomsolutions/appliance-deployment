@@ -11,6 +11,7 @@ PVC_MOUNTER_IMAGE=mdlh/alpine-rsync:3.11-3.1-1
 BASE_DIR=$(dirname "$0")
 BUILD_DIR=$BASE_DIR/target/build
 RESOURCES_DIR=$BASE_DIR/target/resources
+PACKAGING_UTILS_DIR=$PWD/resources/packaging_utils
 IMAGES_FILE=$BUILD_DIR/images.txt
 VALUES_FILE=$BUILD_DIR/k8s-description-files/src/bahmni-helm/values.yaml
 DISTRO_VALUES_FILE=$RESOURCES_DIR/distro/k8s-services.yml
@@ -65,7 +66,7 @@ cat $IMAGES_FILE
 echo "🚀 Download container images..."
 set +e
 mkdir -p $BUILD_DIR/images
-cat $IMAGES_FILE | $BASE_DIR/download-images.sh $BUILD_DIR/images
+cat $IMAGES_FILE | $PACKAGING_UTILS_DIR/download-images.sh $BUILD_DIR/images
 set -e
 
 # Copy resources
