@@ -19,7 +19,7 @@ skopeo sync --scoped --dest-tls-verify=false --src dir --dest docker $AUTORUNNER
 
 # Get USB mount point
 usb_mount_point=`grep "mount_point" /opt/autorunner/usbinfo | cut -d'=' -f2 | tr -d '"'`
-backup_folder=${usb_mount_point}/backup
+backup_folder=${usb_mount_point}/backup-$(date +'%Y-%m-%d_%H-%M')/
 echo "ℹ️ Archives will be saved in '${backup_folder}'"
 mkdir -p $backup_folder
 logs_folder=/mnt/disks/ssd1/logging
