@@ -22,7 +22,7 @@ The USB key can then be plugged on an appliance.
 
 ## 'restore' profile
 
-This profile will prepare scripts to restore database and filestores on an existing cluster.
+This profile will prepare scripts to restore databases and filestores on an existing cluster.
 The profile support restoring the following:
 - Odoo database: `odoo.tar`
 - OpenMRS database: `openmrs.sql`
@@ -63,11 +63,18 @@ No script is provided by default, therefore one must provide one and drop it in 
 ## 'backup' profile
 
 Profile used to backup specific services on an appliance. Currently supported services are:
-- OpenMRS database
-- OpenELIS database
-- Odoo database
-- Odoo filestore
-- Logging service
+- OpenMRS
+- OpenELIS
+- Odoo
+- Logging
+
+### Backup output:
+Running this profile will result in the following set of files extracted from the appliance:
+- OpenMRS database (`backup/openmrs-<timestamp>.sql`)
+- Odoo database (`backup/odoo-<timestamp>.tar`)
+- OpenELIS database (`backup/clinlims<timestamp>.tar`)
+- Filestore - a ZIP file that contain both OpenMRS and Odoo filestore (`backup/filestore/filestore-<timestamp>.zip`)
+- Logging (`backup/filestore/filestore-<timestamp>.zip`)
 
 ## 'sysinfo' profile
 
