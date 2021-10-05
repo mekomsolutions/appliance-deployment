@@ -24,7 +24,7 @@ echo "⚙️ Parse the list of container images from the run.sh ..."
 temp_file=$(mktemp)
 # Empty/create file to hold the list of images
 cat /dev/null > $IMAGES_FILE
-grep -ri "image:" $BUILD_DIR/run.sh | awk -F': ' '{print $3}' | xargs | tr " " "\n" >> $IMAGES_FILE
+grep -rih "image:" $BUILD_DIR/run.sh | awk -F': ' '{print $2}' | xargs | tr " " "\n" >> $IMAGES_FILE
 cp $IMAGES_FILE $temp_file
 # Substitute ${REGISTRY_IP} by 'docker.io'
 sed -e "s/\${REGISTRY_IP}/docker.io/g" $IMAGES_FILE > $temp_file
