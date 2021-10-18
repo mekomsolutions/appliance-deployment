@@ -14,6 +14,10 @@ ps aux > ${sysinfo_folder}/master1_processes.txt
 echo "⚙️  Running 'top'"
 top -n 1 > ${sysinfo_folder}/top.txt
 
+echo "⚙️  Get clock info"
+echo "Hardware time: '$(hwclock -r)'" > ${sysinfo_folder}/time.txt
+echo "System time: '$(date)'" >> ${sysinfo_folder}/time.txt
+
 echo "⚙️  Ping the RPi nodes"
 ping 10.0.90.11 -c 4 -W 3 > ${sysinfo_folder}/ping_worker1.txt
 ping 10.0.90.12 -c 4 -W 3 > ${sysinfo_folder}/ping_worker2.txt
