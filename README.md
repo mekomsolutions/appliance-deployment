@@ -36,7 +36,8 @@ It needs to be given the following variable to work:
 |--------------------|---------|:-----------------------:|
 | `DISTRO_NAME`      | None    | Eg, "bahmni-distro-c2c" |
 | `DISTRO_VERSION`   | None    | Eg, "1.0.3"             |
-| `DISTRO_REVISION`  | None    | Eg, "1.0.3"             |
+| `DISTRO_GROUP`     | None    | Eg "c2c"                |
+| `ARTIFACT_GROUP`   | `net.mekomsolutions`    | The distro Artifact group ID |
 | `K8S_DESCRIPTION_FILES_GIT_REF`  | `master`   | The Git revision of the K8s files to be used for deployment. Eg, "7a1e77398560b914ba4a02e19f2b066d55c1347f"
 
 ## 'deploy' profile
@@ -49,9 +50,14 @@ It needs to be given the following variable to work:
 |--------------------|---------|:-----------------------:|
 | `DISTRO_NAME`      | None    | Eg, "bahmni-distro-c2c" |
 | `DISTRO_VERSION`   | None    | Eg, "1.0.3"             |
-| `DISTRO_REVISION`  | None    | Eg, "1.0.3"             |
+| `DISTRO_GROUP`     | None    | Eg, "c2c"             |
+| `ARTIFACT_GROUP`   | `net.mekomsolutions`    | The distro Artifact group ID |
 | `K8S_DESCRIPTION_FILES_GIT_REF`  | `master`   | The Git revision of the K8s files to be used for deployment. Eg, "7a1e77398560b914ba4a02e19f2b066d55c1347f"             |
 
+### requirements:
+- skopeo
+- maven
+- helm
 ## 'troubleshoot' profile
 
 Profile used to package any script of your choice that should be run on an appliance.

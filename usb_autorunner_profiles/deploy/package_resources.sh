@@ -3,8 +3,8 @@
 # Fail on first error:
 set -e
 
-MAVEN_REPO=https://nexus.mekomsolutions.net/repository/maven-releases
-DISTRO_URL=$MAVEN_REPO/net/mekomsolutions/$DISTRO_NAME/$DISTRO_VERSION/$DISTRO_NAME-$DISTRO_REVISION.zip
+DISTRO_VERSION=${DISTRO_VERSION}
+ARTIFACT_GROUP=${ARTIFACT_GROUP:-net.mekomsolutions}
 
 PVC_MOUNTER_IMAGE=mdlh/alpine-rsync:3.11-3.1-1
 
@@ -27,9 +27,9 @@ mkdir -p $RESOURCES_DIR
 
 # Fetch distro
 echo "⚙️ Download $DISTRO_NAME distro..."
-wget $DISTRO_URL -O $BUILD_DIR/bahmni-distro-c2c.zip
-mkdir -p $RESOURCES_DIR/distro
-unzip $BUILD_DIR/bahmni-distro-c2c.zip -d $RESOURCES_DIR/distro
+mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:get -DremoteRepositories=https://nexus.mekomsolutions.net/repository/maven-public -Dartifact=$ARTIFACT_GROUP:bahmni-distro-$DISTRO_GROUP:$DISTRO_VERSION:zip -Dtransitive=false --legacy-local-repository
+mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:unpack -Dartifact=$ARTIFACT_GROUP:bahmni-distro-$DISTRO_GROUP:$DISTRO_VERSION:zip -DoutputDirectory=$RESOURCES_DIR/distro
+
 
 # Fetch K8s files
 echo "⚙️ Clone K8s description files GitHub repo and checkout '$K8S_DESCRIPTION_FILES_GIT_REF'..."
