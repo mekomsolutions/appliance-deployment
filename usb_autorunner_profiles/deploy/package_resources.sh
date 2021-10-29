@@ -28,8 +28,7 @@ mkdir -p $RESOURCES_DIR
 # Fetch distro
 echo "⚙️ Download $DISTRO_NAME distro..."
 mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:get -DremoteRepositories=https://nexus.mekomsolutions.net/repository/maven-public -Dartifact=$ARTIFACT_GROUP:bahmni-distro-$DISTRO_GROUP:$DISTRO_VERSION:zip -Dtransitive=false --legacy-local-repository
-mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:unpack -Dartifact=$ARTIFACT_GROUP:bahmni-distro-$DISTRO_GROUP:$DISTRO_VERSION:zip -DoutputDirectory=$RESOURCES_DIR/distro
-
+mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:unpack -Dproject.basedir=$BUILD_DIR -Dartifact=$ARTIFACT_GROUP:bahmni-distro-$DISTRO_GROUP:$DISTRO_VERSION:zip -DoutputDirectory=$RESOURCES_DIR/distro
 
 # Fetch K8s files
 echo "⚙️ Clone K8s description files GitHub repo and checkout '$K8S_DESCRIPTION_FILES_GIT_REF'..."
