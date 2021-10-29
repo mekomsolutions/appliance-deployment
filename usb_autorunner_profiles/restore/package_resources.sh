@@ -11,16 +11,15 @@ BUILD_RESOURCES_DIR=$PROFILE_DIR/target/resources
 PACKAGING_UTILS_DIR=$PWD/resources/packaging_utils
 RUN_UTILS_DIR=$PWD/resources/run_utils
 
+DISTRO_VERSION=${DISTRO_VERSION}
+ARTIFACT_GROUP=${ARTIFACT_GROUP:-net.mekomsolutions}
+
 ARCHIVE_PATH=$PROFILE_DIR/archive
 IMAGES_FILE=$BUILD_DIR/images.txt
 K8S_VALUES_FILE=$BUILD_DIR/k8s-description-files/src/bahmni-helm/values.yaml
 K8S_DEPLOYMENT_VALUES_FILE=$PROFILE_DIR/deployment-values.yml
 : ${K8S_DESCRIPTION_FILES_GIT_REF:=master}
 PVC_MOUNTER_IMAGE=mdlh/alpine-rsync:3.11-3.1-1
-
-# URLs
-MAVEN_REPO=https://nexus.mekomsolutions.net/repository/maven-releases
-DISTRO_URL=${MAVEN_REPO}/net/mekomsolutions/${DISTRO_NAME}/${DISTRO_VERSION}/${DISTRO_NAME}-${DISTRO_REVISION}.zip
 
 rm -rf $BUILD_DIR
 mkdir -p $BUILD_DIR
@@ -30,9 +29,9 @@ mkdir -p $BUILD_RESOURCES_DIR
 
 # Fetch distro
 echo "⚙️ Download $DISTRO_NAME distro..."
-wget $DISTRO_URL -O $BUILD_DIR/bahmni-distro-c2c.zip
 mkdir -p $BUILD_DIR/distro
-unzip $BUILD_DIR/bahmni-distro-c2c.zip -d $BUILD_DIR/distro
+mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:get -DremoteRepositories=https://nexus.mekomsolutions.net/repository/maven-public -Dartifact=$ARTIFACT_GROUP:bahmni-distro-$DISTRO_GROUP:$DISTRO_VERSION:zip -Dtransitive=false --legacy-local-repository
+mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:unpack -Dartifact=$ARTIFACT_GROUP:bahmni-distro-$DISTRO_GROUP:$DISTRO_VERSION:zip -DoutputDirectory=$BUILD_RESOURCES_DIR/distro
 
 # Fetch K8s files
 echo "⚙️ Clone K8s description files GitHub repo and checkout '$K8S_DESCRIPTION_FILES_GIT_REF'..."
