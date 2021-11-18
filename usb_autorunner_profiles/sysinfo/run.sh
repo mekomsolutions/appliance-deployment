@@ -24,6 +24,8 @@ ping 10.0.90.12 -c 4 -W 3 > ${sysinfo_folder}/ping_worker2.txt
 
 echo "⚙️  kubectl get nodes"
 $kubectl get nodes -o json > ${sysinfo_folder}/nodes.json
+echo "⚙️  kubectl get services"
+$kubectl get svc -o json > ${sysinfo_folder}/services.json
 echo "⚙️  kubectl get deployment"
 $kubectl get deployment.apps -o json > ${sysinfo_folder}/deployments.json
 echo "⚙️  kubectl get statefulsets"
@@ -42,6 +44,8 @@ echo "⚙️  kubectl describe nodes"
 $kubectl describe nodes > ${sysinfo_folder}/nodes.txt
 echo "⚙️  kubectl describe deployment"
 $kubectl describe deployment.apps > ${sysinfo_folder}/deployments.txt
+echo "⚙️  kubectl describe services"
+$kubectl describe deployment.apps > ${sysinfo_folder}/services.txt
 echo "⚙️  kubectl describe statefulset"
 $kubectl describe statefulset.apps > ${sysinfo_folder}/statefulsets.txt
 echo "⚙️  kubectl describe jobs"
