@@ -18,6 +18,9 @@ echo "⚙️  Get clock info"
 echo "Hardware time: '$(hwclock -r)'" > ${sysinfo_folder}/time.txt
 echo "System time: '$(date)'" >> ${sysinfo_folder}/time.txt
 
+echo "⚙️  Get Storage device space info"
+df -H > ${sysinfo_folder}/storage.txt
+
 echo "⚙️  Ping the RPi nodes"
 ping 10.0.90.11 -c 4 -W 3 > ${sysinfo_folder}/ping_worker1.txt
 ping 10.0.90.12 -c 4 -W 3 > ${sysinfo_folder}/ping_worker2.txt
