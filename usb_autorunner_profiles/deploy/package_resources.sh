@@ -33,7 +33,7 @@ mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:unpack -Dproject.base
 # Fetch K8s files
 echo "⚙️ Clone K8s description files GitHub repo and checkout '$K8S_DESCRIPTION_FILES_GIT_REF'..."
 rm -rf $BUILD_DIR/k8s-description-files
-git clone https://github.com/mekomsolutions/k8s-description-files.git $BUILD_DIR/k8s-description-files
+git clone https://github.com/mekomsolutions/k8s-manifests.git $BUILD_DIR/k8s-description-files
 dir1=$BASE_DIR
 dir2=$PWD
 cd $BUILD_DIR/k8s-description-files && git checkout $K8S_DESCRIPTION_FILES_GIT_REF && cd $dir2
