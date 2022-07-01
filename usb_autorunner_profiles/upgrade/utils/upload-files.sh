@@ -35,8 +35,8 @@ spec:
 EOF
 DIR="$(cd "$(dirname "$0")" && pwd)"
 POD_NAME=$($kubectl get pod -l app=$name -o jsonpath="{.items[0].metadata.name}" -n $NAMESPACE)
-$kubectl wait --for=condition=ready --timeout=60s pod $POD_NAME -n $NAMESPACE
-#incase of failure try sync command 5 times before giving up.
+$kubectl wait --for=condition=ready --timeout=180s pod $POD_NAME -n $NAMESPACE
+#in case of failure try sync command 5 times before giving up.
 n=0
 until [ "$n" -ge 5 ]
 do

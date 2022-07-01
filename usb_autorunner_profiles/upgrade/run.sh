@@ -23,13 +23,15 @@ cd $SCRIPT_DIR/images/docker.io && skopeo sync --scoped --dest-tls-verify=false 
 
 # Remove Odoo 10
 echo "⚙️  Removing 'Odoo 10' services and data..."
-$kubectl_bin delete deployment.apps odoo
-$kubectl_bin delete deployment.apps odoo-connect
-$kubectl exec postgres-0 -- psql -Upostgres -c 'DROP DATABASE IF EXISTS odoo'
+$kubectl_bin delete --ignore-not-found=true deployment.apps odoo
+$kubectl_bin delete --ignore-not-found=true deployment.apps odoo-connect
+$kubectl_bin wait --for delete pod --selector=app=odoo --timeout=120s
+$kubectl_bin wait --for delete pod --selector=app=odoo-connect --timeout=120s
+$kubectl_bin exec postgres-0 -- psql -Upostgres -c 'DROP DATABASE IF EXISTS odoo'
 
 # Remove Odoo filestore
 echo "⚙️  Remove Odoo filestore..."
-cat <<EOF | $kubectl apply -f -
+cat <<EOF | $kubectl_bin apply -f -
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -39,7 +41,6 @@ metadata:
 spec:
   template:
     spec:
-      successfulJobsHistoryLimit: 0
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -67,7 +68,7 @@ EOF
 
 # Remove Existing distro
 echo "⚙️  Removing existing distro..."
-cat <<EOF | $kubectl apply -f -
+cat <<EOF | $kubectl_bin apply -f -
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -77,7 +78,6 @@ metadata:
 spec:
   template:
     spec:
-      successfulJobsHistoryLimit: 0
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -111,14 +111,8 @@ echo "⚙️  Upload the distro..."
 # Sending distro to volume
 $SCRIPT_DIR/utils/upload-files.sh $REGISTRY_IP/mdlh/alpine-rsync:3.11-3.1-1 $SCRIPT_DIR/distro/ distro-pvc
 
-echo "🧽 Delete the current 'openmrs' pod"
-$kubectl_bin delete pods -l app=openmrs -n $NAMESPACE
-
-echo "🧽 Delete the current 'odoo' pod"
-$kubectl_bin delete pods -l app=odoo -n $NAMESPACE
-
-echo "🧽 Delete the current 'openelis' pod"
-$kubectl_bin delete pods -l app=openelis -n $NAMESPACE
+echo "🧽 Delete apps deployments"
+$kubectl_bin delete deployments.apps openelis openmrs bahmni-config bahmniapps bahmni-filestore proxy appointments
 
 # Apply K8s manifests
 echo "⚙️  Apply K8s description files: common/ ..."
