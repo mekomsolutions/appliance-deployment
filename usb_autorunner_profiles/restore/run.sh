@@ -3,6 +3,7 @@
 kubectl="/usr/local/bin/k3s kubectl"
 PWD=$(dirname "$0")
 : "${NAMESPACE:=default}"
+SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && pwd 2> /dev/null; )";
 
 # K8s jobs nmames
 OPENMRS_JOB_NAME=openmrs-db-restore
@@ -26,7 +27,7 @@ REGISTRY_IP=`$kubectl get svc registry-service -o json | jq '.spec.loadBalancerI
 
 # sync images to registry
 echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
-skopeo sync --scoped --dest-tls-verify=false --src dir --dest docker $PWD/images/docker.io $REGISTRY_IP
+cd $SCRIPT_DIR/images/docker.io && skopeo sync --scoped --dest-tls-verify=false --src dir --dest docker ./ $REGISTRY_IP
 
 echo "⚙️  Apply K8s description files"
 $kubectl apply -R -f $DB_RESOURCES_PATH
@@ -280,9 +281,9 @@ spec:
           claimName: data-pvc
       containers:
       - name: filestore-db-restore
-        image: ${REGISTRY_IP}/mekomsolutions/postgres_backup:9ab7a24
+        image: ${REGISTRY_IP}/mekomsolutions/filestore_backup:9ab7a24
         command: ["unzip"]
-        args: ["/opt/filestore.zip", "-o", "-d", "/filestore"]
+        args: ["/opt/filestore.zip", "-d", "/filestore"]
         env:
         volumeMounts:
         - name: restore-storage
