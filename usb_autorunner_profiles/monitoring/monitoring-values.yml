@@ -1,0 +1,9 @@
+alertmanager:
+  persistentVolume:
+    existingClaim: "monitoring-pvc"
+    subPath: "alertmanager"
+
+server:
+  persistentVolume:
+    existingClaim: "monitoring-pvc"
+    subPath: "prometheus_server"
