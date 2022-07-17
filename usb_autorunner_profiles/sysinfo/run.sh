@@ -12,7 +12,7 @@ mkdir -p ${sysinfo_folder}
 echo "⚙️  Running 'ps'"
 ps aux > ${sysinfo_folder}/master1_processes.txt
 echo "⚙️  Running 'top'"
-top -n 1 > ${sysinfo_folder}/top.txt
+top -n 1 | tee ${sysinfo_folder}/top.txt
 
 echo "⚙️  Get clock info"
 echo "Hardware time: '$(hwclock -r)'" > ${sysinfo_folder}/time.txt
@@ -55,4 +55,15 @@ $kubectl describe pods > ${sysinfo_folder}/pods.txt
 echo "⚙️  kubectl describe rsyslog pods"
 $kubectl describe pods -n rsyslog > ${sysinfo_folder}/rsyslog_pods.txt
 
+echo "⚙️  Get disk usage"
+du -hs /mnt/disks/ssd1/* > ${sysinfo_folder}/du_data_folder.txt
+lsblk > ${sysinfo_folder}/lsblk_mount_points.txt
+df -h > ${sysinfo_folder}/df_volume_storage.txt
+
+k3s crictl stats -a > ${sysinfo_folder}/crictl_containers_stats.txt
+du -hs / > ${sysinfo_folder}/root_disk_analysis.txt
+k3s crictl pods | tee ${sysinfo_folder}/crictl_pods.txt
+$kubectl top node | tee ${sysinfo_folder}/nodes_usage.txt > /dev/null
+$kubectl top pod | tee ${sysinfo_folder}/pods_usage.txt > /dev/null
+$kubectl logs $($kubectl get pod -l app=eip-client -o name) | tee ${sysinfo_folder}/eip_client_log.txt > /dev/null
 echo "✅ Done."
