@@ -11,7 +11,9 @@ $kubectl_bin wait --for=condition=ready --timeout 1800s pod $POD_NAME -n $NAMESP
 
 # Sync images to registry
 echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
-cd $SCRIPT_DIR/images/docker.io && skopeo sync --scoped --dest-tls-verify=false --src dir --dest docker ./ $REGISTRY_IP
+for dir in $SCRIPT_DIR/images/*/ ; do
+    cd $dir && skopeo sync --scoped --dest-tls-verify=false --src dir --dest docker ./ $REGISTRY_IP
+done
 
 # Create namespace
 echo "⚙️  Create namespace for monitoring"
@@ -19,10 +21,10 @@ $kubectl_bin create namespace $MONITOR_NAMESPACE
 
 # Create Persistent Volume Claims
 echo "⚙️  Create PVCs for monitoring"
-$kubectl_bin apply -f $SCRIPT_DIR/prom_pvc.yml
+$kubectl_bin apply -f $SCRIPT_DIR/monitoring-pvc.yml
 
 # Apply K8s Prometheus resources
-echo "⚙️  Apply K8s description files: apps/ ..."
+echo "⚙️  Apply K8s Prometheus manifests..."
 $kubectl_bin apply -n $MONITOR_NAMESPACE -f $SCRIPT_DIR/k8s/prometheus -R
 
 echo "✅  Done."

@@ -35,8 +35,6 @@ grep -ri "image:" $RESOURCES_DIR/k8s  | awk -F': ' '{print $3}' | xargs | tr " "
 
 temp_file=$(mktemp)
 cp $IMAGES_FILE $temp_file
-# echo "⚙️ Override '$registry_ip' by 'docker.io'"
-# sed -e "s/${registry_ip}/docker.io/g" $IMAGES_FILE > $temp_file
 echo "⚙️ Remove duplicates..."
 sort $temp_file | uniq > $IMAGES_FILE
 rm ${temp_file}
@@ -51,4 +49,4 @@ set -e
 
 # Copy resources
 echo "⚙️ Copy 'run.sh' and 'utils/'..."
-cp -R $BASE_DIR/run.sh $BASE_DIR/prom_pvc.yml $BASE_DIR/utils $BUILD_DIR/images $RESOURCES_DIR/
+cp -R $BASE_DIR/run.sh $BASE_DIR/monitoring-pvc.yml $BASE_DIR/utils $BUILD_DIR/images $RESOURCES_DIR/
