@@ -1,0 +1,13 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: monitoring-pvc
+  namespace: monitoring
+spec:
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: mekom-nfs
+  accessModes:
+    - ReadWriteMany
