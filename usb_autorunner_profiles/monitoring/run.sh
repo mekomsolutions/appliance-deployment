@@ -3,11 +3,11 @@
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && pwd 2> /dev/null; )";
 REGISTRY_IP=${REGISTRY_IP:-10.0.90.99}
 kubectl_bin="/usr/local/bin/k3s kubectl"
-: "${NAMESPACE:=default}"
+: "${APPLIANCE_NAMESPACE:=appliance}"
 MONITOR_NAMESPACE="monitoring"
 
-POD_NAME=$($kubectl_bin get pod -l app=registry -o jsonpath="{.items[0].metadata.name}" -n $NAMESPACE)
-$kubectl_bin wait --for=condition=ready --timeout 1800s pod $POD_NAME -n $NAMESPACE
+POD_NAME=$($kubectl_bin get pod -l app=registry -o jsonpath="{.items[0].metadata.name}" -n $APPLIANCE_NAMESPACE)
+$kubectl_bin wait --for=condition=ready --timeout 1800s pod $POD_NAME -n $APPLIANCE_NAMESPACE
 
 # Sync images to registry
 echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
