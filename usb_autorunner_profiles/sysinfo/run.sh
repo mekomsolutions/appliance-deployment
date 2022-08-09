@@ -2,7 +2,7 @@
 
 kubectl="/usr/local/bin/k3s kubectl"
 # Get NFS IP address
-registry_ip=`$kubectl get svc registry-service -o json | jq '.spec.loadBalancerIP' | tr -d '"'`
+registry_ip=`$kubectl get svc registry-service -n appliance -o custom-columns=:.spec.loadBalancerIP --no-headers`
 # Get USB mount point
 usb_mount_point=`grep "mount_point" /opt/autorunner/usbinfo | cut -d'=' -f2 | tr -d '"'`
 echo "ℹ️ Archives will be saved in '${usb_mount_point}'"
