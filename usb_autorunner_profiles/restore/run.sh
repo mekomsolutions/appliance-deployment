@@ -23,7 +23,7 @@ mkdir -p $SSD_MOUNT_POINT/data/mysql
 
 # Retrieve Docker registry IP address
 echo "🗂  Retrieve Docker registry IP."
-REGISTRY_IP=`$kubectl get svc registry-service -o json | jq '.spec.loadBalancerIP' | tr -d '"'`
+REGISTRY_IP=`$kubectl get svc registry-service -n appliance -o custom-columns=:.spec.loadBalancerIP --no-headers`
 
 # sync images to registry
 echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
@@ -36,21 +36,21 @@ echo "⚙️  Wait for database services to start"
 sleep 180
 
 echo "⚙️  Fetch MySQL credentials"
-MYSQL_DB_USERNAME=`$kubectl get configmap mysql-configs -o json | jq '.data.MYSQL_ROOT_USER' | tr -d '"'`
-MYSQL_DB_PASSWORD=`$kubectl get configmap mysql-configs -o json | jq '.data.MYSQL_ROOT_PASSWORD' | tr -d '"'`
+MYSQL_DB_USERNAME=`$kubectl get configmap mysql-configs -o custom-columns=:.data.MYSQL_ROOT_USER --no-headers`
+MYSQL_DB_PASSWORD=`$kubectl get configmap mysql-configs -o custom-columns=:.data.MYSQL_ROOT_PASSWORD --no-headers`
 echo "⚙️  Fetch PostgreSQL credentials"
-POSTGRES_DB_USERNAME=`$kubectl get configmap postgres-configs -o json | jq '.data.POSTGRES_USER' | tr -d '"'`
-POSTGRES_DB_PASSWORD=`$kubectl get configmap postgres-configs -o json | jq '.data.POSTGRES_PASSWORD' | tr -d '"'`
+POSTGRES_DB_USERNAME=`$kubectl get configmap postgres-configs -o custom-columns=:.data.POSTGRES_USER --no-headers`
+POSTGRES_DB_PASSWORD=`$kubectl get configmap postgres-configs -o custom-columns=:.data.POSTGRES_PASSWORD --no-headers`
 echo "⚙️  Fetch Odoo database credentials"
-ODOO_DB_USERNAME=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_USER' | tr -d '"'`
-ODOO_DB_PASSWORD=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_PASSWORD' | tr -d '"'`
+ODOO_DB_USERNAME=`$kubectl get configmap odoo-configs -o custom-columns=:.data.ODOO_DB_USER --no-headers`
+ODOO_DB_PASSWORD=`$kubectl get configmap odoo-configs -o custom-columns=:.data.ODOO_DB_PASSWORD --no-headers`
 echo "⚙️  Fetch OpenELIS database credentials"
-OPENELIS_DB_USERNAME=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_USER' | tr -d '"'`
-OPENELIS_DB_PASSWORD=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_PASSWORD' | tr -d '"'`
+OPENELIS_DB_USERNAME=`$kubectl get configmap openelis-db-config -o custom-columns=:.data.OPENELIS_DB_USER --no-headers`
+OPENELIS_DB_PASSWORD=`$kubectl get configmap openelis-db-config -o custom-columns=:.data.OPENELIS_DB_PASSWORD --no-headers`
 echo "⚙️  Fetch database names"
-OPENMRS_DB_NAME=`$kubectl get configmap openmrs-configs -o json | jq '.data.OPENMRS_DB_NAME' | tr -d '"'`
-ODOO_DB_NAME=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_NAME' | tr -d '"'`
-OPENELIS_DBNAME=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_NAME' | tr -d '"'`
+OPENMRS_DB_NAME=`$kubectl get configmap openmrs-configs -o custom-columns=:.data.OPENMRS_DB_NAME --no-headers`
+ODOO_DB_NAME=`$kubectl get configmap odoo-configs -o custom-columns=:.data.ODOO_DB_NAME --no-headers`
+OPENELIS_DBNAME=`$kubectl get configmap openelis-db-config -o custom-columns=:.data.OPENELIS_DB_NAME --no-headers`
 
 echo "Remove previous jobs, if exists"
 $kubectl delete --ignore-not-found=true job ${OPENMRS_JOB_NAME}

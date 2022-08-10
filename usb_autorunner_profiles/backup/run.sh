@@ -11,7 +11,7 @@ LOGGING_JOB_NAME=logging-data-backup
 
 # Retrieve Docker registry IP address
 echo "🗂  Retrieve Docker registry IP."
-REGISTRY_IP=`$kubectl get svc registry-service -o json | jq '.spec.loadBalancerIP' | tr -d '"'`
+REGISTRY_IP=`$kubectl get svc registry-service -n appliance -o custom-columns=:.spec.loadBalancerIP --no-headers`
 
 # Sync images to registry
 echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
@@ -66,8 +66,8 @@ spec:
 EOF
 
 echo "⚙️ Fetch MySQL credentials"
-mysql_root_user=`$kubectl get configmap mysql-configs -o json | jq '.data.MYSQL_ROOT_USER' | tr -d '"'`
-mysql_root_password=`$kubectl get configmap mysql-configs -o json | jq '.data.MYSQL_ROOT_PASSWORD' | tr -d '"'`
+mysql_root_user=`$kubectl get configmap mysql-configs -o custom-columns=:.data.MYSQL_ROOT_USER --no-headers`
+mysql_root_password=`$kubectl get configmap mysql-configs -o custom-columns=:.data.MYSQL_ROOT_PASSWORD --no-headers`
 
 echo "⚙️ Run MySQL backup job"
 # Backup MySQL Databases
@@ -112,14 +112,14 @@ EOF
 
 # Backup PostgreSQL databases
 echo "⚙️ Fetch Odoo database credentials"
-odoo_user=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_USER' | tr -d '"'`
-odoo_password=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_PASSWORD' | tr -d '"'`
-odoo_database=`$kubectl get configmap odoo-configs -o json | jq '.data.ODOO_DB_NAME' | tr -d '"'`
+odoo_user=`$kubectl get configmap odoo-configs -o custom-columns=:.data.ODOO_DB_USER --no-headers`
+odoo_password=`$kubectl get configmap odoo-configs -o custom-columns=:.data.ODOO_DB_PASSWORD --no-headers`
+odoo_database=`$kubectl get configmap odoo-configs -o custom-columns=:.data.ODOO_DB_NAME --no-headers`
 
 echo "⚙️ Fetch OpenELIS database credentials"
-openelis_user=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_USER' | tr -d '"'`
-openelis_password=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_PASSWORD' | tr -d '"'`
-openelis_database=`$kubectl get configmap openelis-db-config -o json | jq '.data.OPENELIS_DB_NAME' | tr -d '"'`
+openelis_user=`$kubectl get configmap openelis-db-config -o custom-columns=:.data.OPENELIS_DB_USER --no-headers`
+openelis_password=`$kubectl get configmap openelis-db-config -o custom-columns=:.data.OPENELIS_DB_PASSWORD --no-headers`
+openelis_database=`$kubectl get configmap openelis-db-config -o custom-columns=:.data.OPENELIS_DB_NAME --no-headers`
 
 
 echo "⚙️ Run PostgreSQL backup jobs"
