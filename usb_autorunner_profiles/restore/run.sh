@@ -12,7 +12,7 @@ OPENELIS_JOB_NAME=openelis-db-restore
 FILESTORE_JOB_NAME=filestore-restore
 
 OPENMRS_SERVICE_NAME=openmrs
-AUTORUNNER_WORKDIR=/opt/autorunner/workdir
+AUTORUNNER_WORKDIR=/opt/usb-autorunner/workdir
 ARCHIVE_PATH=${AUTORUNNER_WORKDIR}/archive
 DB_RESOURCES_PATH=${AUTORUNNER_WORKDIR}/db_resources
 

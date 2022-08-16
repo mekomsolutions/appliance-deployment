@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && pwd 2> /dev/null; )";
-DISTRO_NAME=c2c
 REGISTRY_IP=${REGISTRY_IP:-10.0.90.99}
 SSD_MOUNT_POINT=/mnt/disks/ssd1/
 kubectl_bin="/usr/local/bin/k3s kubectl"
 : "${NAMESPACE:=default}"
 TIMEZONE="America/Port-au-Prince"
+APPL_NAMESPACE="appliance"
 
 echo "⌚️ Set the server time zone to '$TIMEZONE'"
 timedatectl set-timezone $TIMEZONE
@@ -25,8 +25,8 @@ mkdir -p $SSD_MOUNT_POINT/logging
 # Ensure registry directory exists
 echo "⏱  Wait for the registry to be ready..."
 mkdir -p $SSD_MOUNT_POINT/registry
-POD_NAME=$($kubectl_bin get pod -l app=registry -o jsonpath="{.items[0].metadata.name}" -n $NAMESPACE)
-$kubectl_bin wait --for=condition=ready --timeout 1800s pod $POD_NAME -n $NAMESPACE
+POD_NAME=$($kubectl_bin get pod -l app=registry -o jsonpath="{.items[0].metadata.name}" -n $APPL_NAMESPACE)
+$kubectl_bin wait --for=condition=ready --timeout 1800s pod $POD_NAME -n $APPL_NAMESPACE
 
 # sync images to registry
 echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."

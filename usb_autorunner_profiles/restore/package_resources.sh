@@ -73,6 +73,9 @@ echo "🚀 Download container images..."
 set +e
 mkdir -p $BUILD_RESOURCES_DIR/images
 cat $IMAGES_FILE | $PACKAGING_UTILS_DIR/download-images.sh $BUILD_DIR/images
+echo "⚙️ Group official images..."
+mkdir -p $BUILD_DIR/images/docker.io/library
+mv $BUILD_DIR/images/docker.io/*:* $BUILD_DIR/images/docker.io/library
 set -e
 
 # Copy resources
