@@ -2,7 +2,7 @@
 
 kubectl="/usr/local/bin/k3s kubectl"
 
-AUTORUNNER_WORKDIR=/opt/autorunner/workdir
+AUTORUNNER_WORKDIR=/opt/usb-autorunner/workdir
 OPENMRS_JOB_NAME=mysql-openmrs-db-backup
 ODOO_JOB_NAME=postgres-odoo-db-backup
 OPENELIS_JOB_NAME=postgres-openelis-db-backup
@@ -11,14 +11,14 @@ LOGGING_JOB_NAME=logging-data-backup
 
 # Retrieve Docker registry IP address
 echo "🗂  Retrieve Docker registry IP."
-REGISTRY_IP=`$kubectl get svc registry-service -n appliance -o custom-columns=:.spec.loadBalancerIP --no-headers`
+REGISTRY_IP=${REGISTRY_IP:-10.0.90.99}
 
 # Sync images to registry
 echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
-skopeo sync --scoped --dest-tls-verify=false --src dir --dest docker $AUTORUNNER_WORKDIR/images/docker.io $REGISTRY_IP
+cd $AUTORUNNER_WORKDIR/images/docker.io && skopeo sync --scoped --dest-tls-verify=false --src dir --dest docker ./  $REGISTRY_IP
 
 # Get USB mount point
-usb_mount_point=`grep "mount_point" /opt/autorunner/usbinfo | cut -d'=' -f2 | tr -d '"'`
+usb_mount_point=`grep "mount_point" /opt/usb-autorunner/usbinfo | cut -d'=' -f2 | tr -d '"'`
 backup_folder=${usb_mount_point}/backup-$(date +'%Y-%m-%d_%H-%M')/
 echo "ℹ️ Archives will be saved in '${backup_folder}'"
 mkdir -p $backup_folder
@@ -50,7 +50,7 @@ spec:
             path: "${backup_folder}/filestore"
       containers:
       - name: data-backup
-        image: ${REGISTRY_IP}/mekomsolutions/filestore_backup:9556d7c
+        image: mekomsolutions/filestore_backup:9556d7c
         env:
           - name: FILESTORE_PATH
             value: /opt/data
@@ -92,7 +92,7 @@ spec:
             path: "${backup_folder}"
       containers:
       - name: mysql-db-backup
-        image: ${REGISTRY_IP}/mekomsolutions/mysql_backup:9556d7c
+        image: mekomsolutions/mysql_backup:9556d7c
         env:
           - name: DB_NAME
             value: openmrs
@@ -141,7 +141,7 @@ spec:
             path: "${backup_folder}"
       containers:
       - name: postgres-db-backup
-        image: ${REGISTRY_IP}/mekomsolutions/postgres_backup:9556d7c
+        image: mekomsolutions/postgres_backup:9556d7c
         env:
           - name: DB_HOST
             value: postgres
@@ -175,7 +175,7 @@ spec:
             path: "${backup_folder}"
       containers:
       - name: postgres-db-backup
-        image: ${REGISTRY_IP}/mekomsolutions/postgres_backup:9556d7c
+        image: mekomsolutions/postgres_backup:9556d7c
         env:
           - name: DB_HOST
             value: postgres
@@ -215,7 +215,7 @@ spec:
             path: "${backup_folder}/logging"
       containers:
       - name: data-backup
-        image: ${REGISTRY_IP}/mekomsolutions/filestore_backup:9556d7c
+        image: mekomsolutions/filestore_backup:9556d7c
         env:
           - name: FILESTORE_PATH
             value: /opt/data
