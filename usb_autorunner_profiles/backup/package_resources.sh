@@ -26,8 +26,6 @@ temp_file=$(mktemp)
 cat /dev/null > $IMAGES_FILE
 grep -rih "image:" $BUILD_DIR/run.sh | awk -F': ' '{print $2}' | xargs | tr " " "\n" >> $IMAGES_FILE
 cp $IMAGES_FILE $temp_file
-# Substitute ${REGISTRY_IP} by 'docker.io'
-sed -e "s/\${REGISTRY_IP}/docker.io/g" $IMAGES_FILE > $temp_file
 
 echo "⚙️ Remove duplicates..."
 sort $temp_file | uniq > $IMAGES_FILE
