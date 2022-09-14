@@ -18,7 +18,7 @@ echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
 cd $AUTORUNNER_WORKDIR/images/docker.io && skopeo sync --scoped --dest-tls-verify=false --src dir --dest docker ./  $REGISTRY_IP
 
 # Get USB mount point
-usb_mount_point=`grep "mount_point" /opt/usb-autorunner/usbinfo | cut -d'=' -f2 | tr -d '"'`
+usb_mount_point=`grep "mount_point" /etc/usb-autorunner/usbinfo | cut -d'=' -f2 | tr -d '"'`
 backup_folder=${usb_mount_point}/backup-$(date +'%Y-%m-%d_%H-%M')/
 echo "ℹ️ Archives will be saved in '${backup_folder}'"
 mkdir -p $backup_folder
