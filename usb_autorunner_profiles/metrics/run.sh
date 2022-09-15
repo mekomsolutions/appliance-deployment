@@ -20,7 +20,7 @@ echo "ℹ️ Archives will be saved in '${metrics_folder}'"
 mkdir -p $metrics_folder
 
 echo "⚙️  Delete old backup jobs"
-$kubectl delete job -l app=metrics-backup -n monitoring --ignore-not-found=true
+$kubectl delete job -n monitoring -l app=metrics-backup -n monitoring --ignore-not-found=true
 
 echo "⚙️  Add ConfigMap to 'Get prometheus snapshot'"
 
@@ -35,7 +35,7 @@ data:
     #!/bin/sh
     set -eu
 
-    snapshot_folder=\`curl -XPOST http://prometheus-server.monitoring/api/v1/admin/tsdb/snapshot | jq ".data.name" -r\` 
+    snapshot_folder=\`curl -XPOST http://prometheus-server.monitoring/api/v1/admin/tsdb/snapshot | jq ".data.name" -r\`
     
     cp -r /opt/metrics/prometheus_server/snapshots/\$snapshot_folder /opt/output/
 
