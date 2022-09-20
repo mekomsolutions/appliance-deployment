@@ -4,11 +4,14 @@ connect:
     CONNECT_MYSQL_USERNAME: root # username with replication rights for openmrs mysql server
     CONNECT_MYSQL_PASSWORD: password # 
     CONNECT_MYSQL_PORT: "3306"
+    ANALYTICS_DB_HOST: "postgres.default"
+
 jobmanager:
   env:
     FLINK_JOB_POSTGRES_URL: jdbc:postgresql://postgres.default:5432/analytics #JDBC url for sink database to used to store flatted data
     FLINK_JOB_POSTGRES_PASSWORD: password
     FLINK_JOB_POSTGRES_USER: analytics
+
 parquetExport:
   persistence:
     existingClaim: parquet-pvc
