@@ -35,7 +35,7 @@ data:
     #!/bin/sh
     set -eu
 
-    chown nobody:nogroup /opt/metrics/prometheus_server/01* -R
+    chown nobody:nogroup /opt/metrics/prometheus_server/* -R
 
     snapshot_folder=\`curl -XPOST http://prometheus-server.monitoring/api/v1/admin/tsdb/snapshot?skip_head=true | jq ".data.name" -r\`
     
