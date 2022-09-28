@@ -22,23 +22,8 @@ echo "⚙️  Ping the RPi nodes"
 ping 10.0.90.11 -c 4 -W 3 > ${sysinfo_folder}/ping_worker1.txt
 ping 10.0.90.12 -c 4 -W 3 > ${sysinfo_folder}/ping_worker2.txt
 
-echo "⚙️  kubectl get nodes"
-$kubectl get nodes -o json > ${sysinfo_folder}/nodes.json
-echo "⚙️  kubectl get services"
-$kubectl get svc -o json > ${sysinfo_folder}/services.json
-echo "⚙️  kubectl get deployment"
-$kubectl get deployment.apps -o json > ${sysinfo_folder}/deployments.json
-echo "⚙️  kubectl get statefulsets"
-$kubectl get statefulsets.apps -o json > ${sysinfo_folder}/statefulsets.json
-echo "⚙️  kubectl get pods"
-$kubectl get pods -o json > ${sysinfo_folder}/pods.json
-echo "⚙️  kubectl get jobs"
-$kubectl get jobs -o json > ${sysinfo_folder}/jobs.json
-echo "⚙️  kubectl get pv"
-$kubectl get pv -o json > ${sysinfo_folder}/pv.json
-echo "⚙️  kubectl get pvc"
-$kubectl get pvc -o json > ${sysinfo_folder}/pvc.json
-$kubectl get pods -n rsyslog -o json > ${sysinfo_folder}/rsyslog_pods.json
+echo "⚙️  kubectl get cluster-info dump"
+$kubectl cluster-info dump > ${sysinfo_folder}/cluster_dump.txt
 
 echo "⚙️  kubectl describe nodes"
 $kubectl describe nodes > ${sysinfo_folder}/nodes.txt
