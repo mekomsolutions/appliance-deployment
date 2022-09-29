@@ -26,6 +26,7 @@ taskManager:
       memory: 6000Mi
     requests:
       memory: 5000Mi
+      cpu: 1000m
 kafka:
   image: zouchine/debezium-kafka:latest
   persistence:
