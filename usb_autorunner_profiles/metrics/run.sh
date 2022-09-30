@@ -16,7 +16,7 @@ cd $AUTORUNNER_WORKDIR/images/docker.io && skopeo sync --scoped --dest-tls-verif
 # Get USB mount point
 usb_mount_point=`grep "mount_point" /etc/usb-autorunner/usbinfo | cut -d'=' -f2 | tr -d '"'`
 metrics_folder=${usb_mount_point}/metrics-$(date +'%Y-%m-%d_%H-%M')/
-echo "ℹ️ Archives will be saved in '${metrics_folder}'"
+echo "ℹ️  Archives will be saved in '${metrics_folder}'"
 mkdir -p $metrics_folder
 
 echo "⚙️  Delete old backup jobs"
