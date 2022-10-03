@@ -9,8 +9,10 @@ ANALYTICS_NAMESPACE="analytics"
 POD_NAME=$($kubectl_bin get pod -l app=registry -o jsonpath="{.items[0].metadata.name}" -n $APPLIANCE_NAMESPACE)
 $kubectl_bin wait --for=condition=ready --timeout 1800s pod $POD_NAME -n $APPLIANCE_NAMESPACE
 
+echo "⚙️  Create required folders"
 mkdir -p /mnt/disks/ssd1/analytics/parquet
-mkdir -p /mnt/disks/ssd1/analytics/kafka
+mkdir -p /mnt/disks/ssd1/analytics/kafka/data
+chmod 777 -R /mnt/disks/ssd1/analytics
 
 # Sync images to registry
 echo "⚙️  Upload container images to the registry at $REGISTRY_IP..."
