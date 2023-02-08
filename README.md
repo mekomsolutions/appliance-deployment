@@ -40,7 +40,7 @@ It needs to be given the following variable to work:
 | `DISTRO_VERSION`   | None    | Eg, "1.0.3"             |
 | `DISTRO_GROUP`     | None    | Eg "c2c"                |
 | `ARTIFACT_GROUP`   | `net.mekomsolutions`    | The distro Artifact group ID |
-| `K8S_DESCRIPTION_FILES_GIT_REF`  | `master`   | The Git revision of the K8s files to be used for deployment. Eg, "7a1e77398560b914ba4a02e19f2b066d55c1347f"
+| `HELM_CHART_VERSION`  | None   | Eg, "1.0.0-dev" |
 
 ## 'deploy' profile
 
@@ -55,7 +55,7 @@ It needs to be given the following variable to work:
 | `DISTRO_GROUP`     | None    | Eg, "c2c"             |
 | `DISTRO_REVISION`     | None    | Eg, "1.3.0", "1.1.0-20211119.110835-35"   |
 | `ARTIFACT_GROUP`   | `net.mekomsolutions`    | The distro Artifact group ID |
-| `K8S_DESCRIPTION_FILES_GIT_REF`  | `master`   | The Git revision of the K8s files to be used for deployment. Eg, "7a1e77398560b914ba4a02e19f2b066d55c1347f"             |
+| `HELM_CHART_VERSION`  | None   | Eg, "1.0.0-dev" |
 
 ### requirements:
 - skopeo
