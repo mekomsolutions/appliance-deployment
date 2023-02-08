@@ -5,6 +5,7 @@ set -e
 
 DISTRO_VERSION=${DISTRO_VERSION}
 ARTIFACT_GROUP=${ARTIFACT_GROUP:-net.mekomsolutions}
+HELM_CHART_VERSION=${HELM_CHART_VERSION}
 
 PVC_MOUNTER_IMAGE=mdlh/alpine-rsync:3.11-3.1-1
 
@@ -16,8 +17,6 @@ IMAGES_FILE=$BUILD_DIR/images.txt
 VALUES_FILE=$BUILD_DIR/k8s-description-files/src/bahmni-helm/values.yaml
 DISTRO_VALUES_FILE=$RESOURCES_DIR/distro/k8s-services.yml
 DEPLOYMENT_VALUES_FILE=$BASE_DIR/deployment-values.yml
-: {K8S_DESCRIPTION_FILES_GIT_REF:=master}
-: ${K8S_DESCRIPTION_FILES_GIT_REF:=master}
 
 rm -rf $BUILD_DIR
 mkdir -p $BUILD_DIR
@@ -31,15 +30,13 @@ mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:get -DremoteRepositor
 mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:unpack -Dproject.basedir=$BUILD_DIR -Dartifact=$ARTIFACT_GROUP:bahmni-distro-$DISTRO_GROUP:$DISTRO_VERSION:zip -DoutputDirectory=$RESOURCES_DIR/distro
 
 # Fetch K8s files
-echo "⚙️ Clone K8s description files GitHub repo and checkout '$K8S_DESCRIPTION_FILES_GIT_REF'..."
-rm -rf $BUILD_DIR/k8s-description-files
-git clone https://github.com/mekomsolutions/k8s-manifests.git $BUILD_DIR/k8s-description-files
-dir1=$BASE_DIR
-dir2=$PWD
-cd $BUILD_DIR/k8s-description-files && git checkout $K8S_DESCRIPTION_FILES_GIT_REF && cd $dir2
+echo "⚙️ Pull Bahmni Helm Chart..."
 
-echo "⚙️ Run Helm to substitute custom values..."
-helm template `[ -f $DISTRO_VALUES_FILE ] && echo "-f $DISTRO_VALUES_FILE"` `[ -f $DEPLOYMENT_VALUES_FILE ] && echo "-f $DEPLOYMENT_VALUES_FILE"` $DISTRO_NAME $BUILD_DIR/k8s-description-files/src/bahmni-helm --output-dir $RESOURCES_DIR/k8s
+helm repo add mekom https://nexus.mekomsolutions.net/repository/helm/
+helm pull --untar -d $BUILD_DIR mekom/bahmni-helm --version $HELM_CHART_VERSION
+
+echo "⚙️ Run Helm template to substitute custom values..."
+helm template `[ -f $DISTRO_VALUES_FILE ] && echo "-f $DISTRO_VALUES_FILE"` `[ -f $DEPLOYMENT_VALUES_FILE ] && echo "-f $DEPLOYMENT_VALUES_FILE"` $DISTRO_NAME $BUILD_DIR/bahmni-helm --output-dir $RESOURCES_DIR/k8s
 
 # Get container images
 cat /dev/null > $IMAGES_FILE
@@ -66,10 +63,10 @@ echo "🚀 Download container images..."
 set +e
 mkdir -p $BUILD_DIR/images
 cat $IMAGES_FILE | $PACKAGING_UTILS_DIR/download-images.sh $BUILD_DIR/images
-set -e
 echo "⚙️ Group official docker images..."
 mkdir -p $BUILD_DIR/images/docker.io/library
-mv $BUILD_DIR/images/docker.io/*:* $BUILD_DIR/images/docker.io/library/
+mv $BUILD_DIR/images/docker.io/*:* $BUILD_DIR/images/docker.io/library/ 2>/dev/null
+set -e
 
 # Copy resources
 echo "⚙️ Copy 'run.sh' and 'utils/'..."
