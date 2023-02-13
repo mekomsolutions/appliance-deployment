@@ -6,6 +6,7 @@ set -e
 PROFILE_DIR=$(dirname "$0")
 BUILD_DIR=$PROFILE_DIR/target/build
 BUILD_RESOURCES_DIR=$PROFILE_DIR/target/resources
+HELM_CHART_VERSION=${HELM_CHART_VERSION}
 
 # Utils
 PACKAGING_UTILS_DIR=$PWD/resources/packaging_utils
@@ -16,9 +17,8 @@ ARTIFACT_GROUP=${ARTIFACT_GROUP:-net.mekomsolutions}
 
 ARCHIVE_PATH=$PROFILE_DIR/archive
 IMAGES_FILE=$BUILD_DIR/images.txt
-K8S_VALUES_FILE=$BUILD_DIR/k8s-description-files/src/bahmni-helm/values.yaml
+K8S_VALUES_FILE=$BUILD_DIR/bahmni-helm/values.yaml
 K8S_DEPLOYMENT_VALUES_FILE=$PROFILE_DIR/deployment-values.yml
-: ${K8S_DESCRIPTION_FILES_GIT_REF:=master}
 PVC_MOUNTER_IMAGE=mdlh/alpine-rsync:3.11-3.1-1
 
 rm -rf $BUILD_DIR
@@ -34,16 +34,13 @@ mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:get -DremoteRepositor
 mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:unpack -Dartifact=$ARTIFACT_GROUP:bahmni-distro-$DISTRO_GROUP:$DISTRO_VERSION:zip -DoutputDirectory=$BUILD_RESOURCES_DIR/distro
 
 # Fetch K8s files
-echo "⚙️ Clone K8s description files GitHub repo and checkout '$K8S_DESCRIPTION_FILES_GIT_REF'..."
-rm -rf $BUILD_DIR/k8s-description-files
-git clone https://github.com/mekomsolutions/k8s-description-files.git $BUILD_DIR/k8s-description-files
-dir1=$PROFILE_DIR
-dir2=$PWD
-cd $BUILD_DIR/k8s-description-files && git checkout $K8S_DESCRIPTION_FILES_GIT_REF && cd $dir2
+echo "⚙️ Pull Bahmni Helm Chart..."
 
-cat $K8S_DEPLOYMENT_VALUES_FILE
+helm repo add mekom https://nexus.mekomsolutions.net/repository/helm/
+helm pull --untar -d $BUILD_DIR mekom/bahmni-helm --version $HELM_CHART_VERSION
+
 echo "⚙️ Run Helm to substitute custom values..."
-helm template `[ -f $K8S_DEPLOYMENT_VALUES_FILE ] && echo "-f $K8S_DEPLOYMENT_VALUES_FILE"` $DISTRO_NAME $BUILD_DIR/k8s-description-files/src/bahmni-helm --output-dir $BUILD_DIR/k8s
+helm template `[ -f $K8S_DEPLOYMENT_VALUES_FILE ] && echo "-f $K8S_DEPLOYMENT_VALUES_FILE"` $DISTRO_NAME $BUILD_DIR/bahmni-helm --output-dir $BUILD_DIR/k8s
 
 # Get container images
 cat /dev/null > $IMAGES_FILE
