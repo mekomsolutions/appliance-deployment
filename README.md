@@ -91,16 +91,36 @@ Profile used to retrieve some system information to facilitate troubleshooting.
 
 ## 'analytics' profile
 Profile used to setup Analytics & reporting on the appliances.
-# requirements:
+### **requirements**:
 Required variables:
 - REGISTRY_USER
 - REGISTRY_PASSWORD
 
-github user should have access to `ozone-his` to be able to fetch `ozone-analytics-helm`
-
 run: `./zip_and_encrypt.sh analytics` to get the package
 
-### Dependencies
+***Notes***:
+
+- Docker registry user should have access to `mekomsolutions` private repositories.
+
+## 'parquet' profile
+Profile used to setup Analytics & reporting on the appliances.
+
+### **requirements**:
+Required variables:
+- REGISTRY_USER
+- REGISTRY_PASSWORD
+- LOCATION_TAG
+
+run: `./zip_and_encrypt.sh parquet` to get the package
+
+***Notes***:
+- Github user should have access to `ozone-his` to be able to fetch `ozone-analytics-helm` 
+
+- Docker registry user should have access to `mekomsolutions` private repositories.
+
+- The profile will output a timestamped folder with exported data
+
+## **Dependencies**
 
 - yq (Attention: there are 2 `yq`. Use the Pip3 one: https://kislyuk.github.io/yq/)
 - Skopeo
