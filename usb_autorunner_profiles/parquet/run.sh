@@ -32,7 +32,7 @@ echo "⚙️  Apply K8s Analytics manifests..."
 $kubectl_bin apply -f $SCRIPT_DIR/k8s/ozone-analytics -R
 
 echo "⚙️  Waiting for ETL job to finish..."
-$kubectl_bin wait --for=condition=complete --timeout=1800s -n $ANALYTICS_NAMESPACE job/analytics-ozone-analytics-batch-job
+$kubectl_bin wait --for=condition=complete --timeout=7200s -n $ANALYTICS_NAMESPACE job/analytics-ozone-analytics-batch-job
 
 # Generate K8s file
 parquet_folder=$parquet_folder envsubst < $SCRIPT_DIR/k8s/parquet-export.yml.template > $SCRIPT_DIR/k8s/parquet-export.yml

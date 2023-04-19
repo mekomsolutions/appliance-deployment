@@ -36,7 +36,7 @@ mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:unpack -Dartifact=$AR
 # Fetch K8s files
 echo "⚙️ Pull Bahmni Helm Chart..."
 
-helm repo add mekom https://nexus.mekomsolutions.net/repository/helm/
+helm repo add --force-update mekom https://nexus.mekomsolutions.net/repository/helm/
 helm pull --untar -d $BUILD_DIR mekom/bahmni-helm --version $HELM_CHART_VERSION
 
 echo "⚙️ Run Helm to substitute custom values..."
